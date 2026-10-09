@@ -1,0 +1,253 @@
+:host {
+  display: block;
+}
+
+.page-heading,
+.section-heading {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-6);
+}
+
+.eyebrow {
+  margin: 0 0 var(--space-3);
+  color: var(--color-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+}
+
+h1,
+h2,
+h3,
+p {
+  margin-top: 0;
+}
+
+h1 {
+  margin-bottom: var(--space-2);
+  font-size: clamp(1.75rem, 3vw, 2.125rem);
+  font-weight: 650;
+  line-height: 1.2;
+  letter-spacing: -0.035em;
+}
+
+.page-description {
+  margin-bottom: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.65;
+}
+
+.workspace-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-muted);
+  font-size: 0.75rem;
+}
+
+.welcome-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(220px, 0.8fr);
+  align-items: center;
+  overflow: hidden;
+  margin-top: var(--space-8);
+  padding: clamp(1.5rem, 3vw, 2.5rem);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.welcome-copy {
+  position: relative;
+  z-index: 1;
+
+  .eyebrow {
+    color: var(--color-accent);
+  }
+
+  h2 {
+    margin-bottom: var(--space-4);
+    font-size: clamp(1.5rem, 2.6vw, 2rem);
+    font-weight: 600;
+    line-height: 1.25;
+    letter-spacing: -0.035em;
+  }
+
+  > p:not(.eyebrow) {
+    max-width: 340px;
+    margin-bottom: var(--space-6);
+    color: var(--color-muted);
+    font-size: 0.875rem;
+    line-height: 1.8;
+  }
+
+  button {
+    min-height: 44px;
+    padding-inline: var(--space-4);
+    font-size: 0.75rem;
+  }
+}
+
+.button-arrow {
+  margin-left: var(--space-2);
+  vertical-align: middle;
+  width: 1rem;
+}
+
+.preparation-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+  color: var(--color-muted);
+  font-size: 0.6875rem;
+
+  app-icon {
+    width: 0.9rem;
+    color: var(--color-accent);
+  }
+}
+
+.application-visual {
+  width: 100%;
+  max-width: 340px;
+  height: auto;
+  justify-self: center;
+}
+
+.process {
+  margin-top: var(--space-8);
+}
+
+.section-heading {
+  margin-bottom: var(--space-6);
+
+  .eyebrow {
+    margin-bottom: var(--space-2);
+  }
+
+  h2 {
+    margin-bottom: 0;
+    font-size: 1.05rem;
+    font-weight: 600;
+    letter-spacing: -0.02em;
+  }
+}
+
+.section-note {
+  color: var(--color-muted);
+  font-size: 0.6875rem;
+}
+
+.stages {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+}
+
+.stage {
+  padding: var(--space-6);
+
+  + .stage {
+    border-left: 1px solid var(--color-border);
+  }
+
+  h3 {
+    margin-bottom: var(--space-2);
+    font-size: 0.9375rem;
+    font-weight: 600;
+    letter-spacing: -0.025em;
+  }
+}
+
+.stage-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-6);
+}
+
+.stage-icon {
+  display: grid;
+  place-items: center;
+  width: 36px;
+  height: 36px;
+  border-radius: var(--radius-sm);
+  background: var(--color-subtle);
+  color: #456172;
+}
+
+.stage-number {
+  color: var(--color-muted);
+  font-size: 0.65rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.stage-role {
+  margin-bottom: var(--space-2);
+  color: var(--color-accent);
+  font-size: 0.6875rem;
+  font-weight: 650;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.stage-description {
+  margin-bottom: 0;
+  color: var(--color-muted);
+  font-size: 0.875rem;
+  line-height: 1.8;
+}
+
+.information-note {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-6);
+  color: var(--color-muted);
+
+  > app-icon {
+    color: #667e8c;
+  }
+
+  p {
+    margin: 0;
+    font-size: 0.6875rem;
+    line-height: 1.7;
+  }
+}
+
+@media (max-width: 1199px) {
+  .workspace-label,
+  .section-note {
+    display: none;
+  }
+}
+
+@media (max-width: 599px) {
+  .welcome-panel {
+    grid-template-columns: 1fr;
+  }
+
+  .application-visual {
+    display: none;
+  }
+
+  .stages {
+    grid-template-columns: 1fr;
+  }
+
+  .stage + .stage {
+    border-left: 0;
+    border-top: 1px solid var(--color-border);
+  }
+
+  .stage-top {
+    margin-bottom: var(--space-4);
+  }
+}

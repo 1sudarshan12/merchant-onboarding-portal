@@ -1,0 +1,63 @@
+<div class="page-heading">
+  <div>
+    <p class="eyebrow">YOUR WORKSPACE</p>
+    <h1>Merchant applications</h1>
+    <p class="page-description">A clear path from merchant details to a considered decision.</p>
+  </div>
+  <span class="workspace-label"><app-icon name="grid" /> Overview</span>
+</div>
+
+<section class="welcome-panel" aria-labelledby="welcome-title">
+  <div class="welcome-copy">
+    <p class="eyebrow">PREPARE WITH CONFIDENCE</p>
+    <h2 id="welcome-title">Good applications<br />start with the details.</h2>
+    <p>
+      Know what to gather before you begin. A little preparation makes every stage of the review
+      easier.
+    </p>
+    <button mat-flat-button type="button" (click)="openChecklist()">
+      View application checklist <app-icon class="button-arrow" name="arrow" />
+    </button>
+    <span class="preparation-note"
+      ><app-icon name="check" /> Business, banking & processing details</span
+    >
+  </div>
+  <img
+    class="application-visual"
+    src="application-illustration.svg"
+    width="340"
+    height="300"
+    alt=""
+  />
+</section>
+
+<section class="process" aria-labelledby="process-title">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">HOW IT WORKS</p>
+      <h2 id="process-title">One process. Shared responsibility.</h2>
+    </div>
+    <span class="section-note">From preparation to decision</span>
+  </div>
+  <div class="stages">
+    @for (stage of stages; track stage.number) {
+      <article class="stage">
+        <div class="stage-top">
+          <span class="stage-icon"><app-icon [name]="stage.icon" /></span
+          ><span class="stage-number">{{ stage.number }}</span>
+        </div>
+        <p class="stage-role">{{ stage.role }}</p>
+        <h3>{{ stage.title }}</h3>
+        <p class="stage-description">{{ stage.description }}</p>
+      </article>
+    }
+  </div>
+</section>
+
+<div class="information-note">
+  <app-icon name="shield" />
+  <p>
+    Each role has a purpose. Sales prepares, admins coordinate, and reviewers make the risk
+    decision.
+  </p>
+</div>

@@ -22,7 +22,23 @@ The selected foundation is Angular 21, standalone components, strict TypeScript,
 | Inspect running page                        | Passed: desktop and 375px width, no horizontal overflow; skip link moves focus to main; no captured browser warnings/errors. |
 | Complete learner exercise                   | Not yet recorded.                                                                                                            |
 
-The implementation portion of checkpoint 1 is complete. Pause here for the learner to inspect the files and try the exercise. No business feature, permission enforcement, autosave, or token-refresh behavior is claimed complete at this checkpoint.
+The implementation portion of checkpoint 1 is complete. Checkpoint 2 below builds on it; the learner exercise remains unrecorded. No business feature, permission enforcement, autosave, or token-refresh behavior is claimed complete at this checkpoint.
+
+## Checkpoint 2: Visual foundation and workspace shell
+
+Implemented a consistent Material/SCSS theme with semantic tokens, responsive sidebar/drawer, lazy `/overview` route, a preparation checklist dialog, accessible decorative icons, and a local SVG illustration. Added a design guide and updated the setup, architecture, learning, and AI-assistance records.
+
+Verification:
+
+- Production build: `npm run build` passed without warnings; 435.48 kB initial bundle and a separate 7.76 kB workspace chunk.
+- TestBed: `npm run test:ci` passed both route/dialog integration tests.
+- Browser: desktop and 375px layouts inspected; no horizontal overflow detected.
+- Keyboard: skip link stays on `/overview` and focuses main; dialog Tab focus wraps; Escape returns focus to its opener. The nested mobile drawer/checklist flow restores focus to the drawer button, then the menu button.
+- Console: no warnings or errors captured during the final browser checks.
+- Review: corrected insufficient contrast on the small stage numbers.
+- Formatting: `npm run format:check` passed.
+
+This is the visual foundation. It does not yet implement the application dashboard, server pagination, login, permission enforcement, draft saving, or reviews. Next work is the domain/API contract and mock server.
 
 ## Future checkpoints
 

@@ -17,6 +17,16 @@ This is a working design record, not a claim that every feature exists. The orig
 
 Avoid adding abstractions or feature folders before there is code that needs them. A future feature can own its page, API access, and tests; application-wide authentication belongs in a shared core area.
 
+## Styling choice and visual quality
+
+The assignment explicitly requests “Bootstrap 5 or Angular Material with SCSS responsive layouts.” Material and SCSS remain the current implementation choice because they match that requirement. Angular itself supports Tailwind; this is a requirement-driven choice, not an Angular restriction. See [Angular's Tailwind guide](https://angular.dev/guide/tailwind).
+
+The candidate raised a concern that the checkpoint 1 screen was too basic for a senior submission. Checkpoint 2 replaces it with a responsive shell, consistent design tokens, a workspace overview, and a checklist interaction. This improves the visual foundation; the final application dashboard and workflows still need to be built and reviewed. Passing tests alone does not establish visual quality.
+
+Before expanding the UI, establish a consistent palette, typography hierarchy, spacing scale, control sizing, and focus treatment. As features arrive, use a task-focused application shell, clear role-aware actions, readable application lists, and designed loading, empty, error, validation, and save states. Avoid adding nonfunctional controls to make the scaffold appear complete.
+
+Tailwind could be an additional styling tool, but replacing the specified stack outright would depart from the brief. No Tailwind dependency has been added. A switch would need a clear benefit beyond visual polish, which either styling approach can deliver.
+
 ## Proposed roles and workflow
 
 These are conservative implementation assumptions, not extra requirements from the assignment. Keep one permission contract for the UI and mock API; the supplied plans disagree about ADMIN permissions.
@@ -52,3 +62,11 @@ Prioritize the required dashboard, application wizard, draft saving, review deta
 Checked on 9 October 2026 with Node 24.14.0 and npm 11.9.0. Installed versions are locked in `package-lock.json`: Angular core 21.2.25, CLI 21.2.26, Material 21.2.14, and Vitest 4.1.11. The production build passed without warnings, and the TestBed rendering smoke test passed. Desktop and 375px browser checks verified readable layout, no horizontal overflow, and keyboard access to the main content. Full workflow and accessibility checks remain future work.
 
 References: [Angular version compatibility](https://angular.dev/reference/versions), [Angular testing](https://angular.dev/guide/testing), and [Material theming](https://material.angular.dev/guide/theming).
+
+## Checkpoint 2 component boundaries
+
+`App` owns the responsive Material sidenav, skip link, navigation, and router outlet. `Workspace` owns the `/overview` page content and loads through `loadComponent`. `ApplicationChecklist` is a dialog that both navigation and the overview can open; it does not submit data. `Icon` supplies the repeated decorative SVG glyphs, while button or link labels provide accessible names.
+
+`BreakpointObserver` emits viewport changes as an Observable. `toSignal` exposes its current mobile/desktop state to the template and handles subscription cleanup. A separate `navigationOpen` signal stores the user-controlled mobile drawer state. These are UI states, not authentication or permission state.
+
+Global CSS custom properties live in `src/styles/_tokens.scss`. Material theme overrides consume the same accent/surface/canvas tokens. Component SCSS handles each component's layout; the decorative illustration stays in a local SVG asset so it does not inflate the page stylesheet. No new npm dependencies were needed for this checkpoint.
