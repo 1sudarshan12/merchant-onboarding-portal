@@ -1,0 +1,26 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 300" fill="none">
+  <circle cx="170" cy="145" r="139" fill="#f6faf8" stroke="#e2eeea"/>
+  <circle cx="170" cy="145" r="113" fill="#eef5f1" stroke="#e2eeea"/>
+  <g transform="rotate(7 170 145)">
+    <rect x="90" y="45" width="174" height="207" rx="10" fill="#e4eee8" stroke="#d9e4de"/>
+  </g>
+  <g transform="rotate(-5 170 145)">
+    <rect x="80" y="36" width="180" height="217" rx="10" fill="#193c2d" fill-opacity=".04"/>
+    <rect x="78" y="32" width="180" height="217" rx="10" fill="white" stroke="#d9e4de"/>
+    <path d="M101 58h13l7 7v21h-20V58Z M114 58v8h7 M106 72h10 M106 77h10" stroke="#176b62" stroke-width="1.5" stroke-linejoin="round"/>
+    <text x="133" y="68" fill="#5b6877" font-family="Arial,sans-serif" font-size="10">Merchant</text>
+    <text x="133" y="83" fill="#192b3b" font-family="Arial,sans-serif" font-size="13" font-weight="600">Application</text>
+    <path d="M99 105h138" stroke="#e7ece9"/>
+    <text x="100" y="124" fill="#6b7b75" font-family="Arial,sans-serif" font-size="7" letter-spacing="1">BUSINESS DETAILS</text>
+    <rect x="100" y="136" width="126" height="5" rx="2" fill="#e0e8e4"/>
+    <rect x="100" y="148" width="91" height="5" rx="2" fill="#e0e8e4"/>
+    <rect x="100" y="168" width="62" height="20" rx="3" stroke="#e4eae6"/>
+    <rect x="171" y="168" width="65" height="20" rx="3" stroke="#e4eae6"/>
+    <path d="M99 206h138" stroke="#e7ece9"/>
+    <circle cx="102" cy="223" r="2" fill="#176b62"/>
+    <text x="110" y="225" fill="#607369" font-family="Arial,sans-serif" font-size="6.5">Prepared for the next step</text>
+  </g>
+  <circle cx="257" cy="230" r="21" fill="#176b62" stroke="white" stroke-width="4"/>
+  <path d="m249 230 5 5 11-11" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+  <text x="170" y="295" text-anchor="middle" fill="#63766c" font-family="Arial,sans-serif" font-size="10">Every detail has a place.</text>
+</svg>

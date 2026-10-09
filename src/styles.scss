@@ -1,12 +1,31 @@
 @use '@angular/material' as mat;
+@use './styles/tokens';
 
 html {
   color-scheme: light;
   @include mat.theme(
     (
-      color: mat.$azure-palette,
-      typography: Arial,
+      color: mat.$cyan-palette,
+      typography: 'Segoe UI',
       density: 0,
+    )
+  );
+  @include mat.theme-overrides(
+    (
+      primary: var(--color-accent),
+      on-primary: var(--color-surface),
+    )
+  );
+  @include mat.button-overrides(
+    (
+      filled-container-shape: 8px,
+      outlined-container-shape: 8px,
+    )
+  );
+  @include mat.sidenav-overrides(
+    (
+      container-shape: 0,
+      content-background-color: var(--color-canvas),
     )
   );
 }
@@ -19,7 +38,40 @@ html {
 
 body {
   margin: 0;
-  background: #f4f7f9;
-  color: #172b38;
-  font-family: Arial, sans-serif;
+  background: var(--color-canvas);
+  color: var(--color-ink);
+  font-family: var(--font-body);
+  -webkit-font-smoothing: antialiased;
+}
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button,
+a {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:where(a, button, input, select, textarea, [tabindex]):focus-visible {
+  outline: 3px solid var(--color-focus);
+  outline-offset: 4px;
+}
+
+::selection {
+  background: #cce8df;
+  color: var(--color-ink);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

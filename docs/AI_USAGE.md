@@ -28,3 +28,11 @@ Record actual commands, outcomes, and corrections when checks are run. Do not cl
 ## Ownership and confidentiality
 
 The candidate remains responsible for the submitted code, final design decisions, verification, and interview explanation. Keep the assignment and solution private according to the assignment terms. This disclosure summarizes assistance without reproducing the private assignment or the plans' embedded prompts.
+
+## Checkpoint 2 assistance
+
+Codex implemented the responsive shell, lazy workspace route, SCSS design tokens, Material checklist dialog, decorative icons and SVG illustration, and route/dialog integration tests. It updated the README, design guide, architecture notes, and learning log. A Codex subagent helped with the checklist, icon component, design guide, and a bounded code review.
+
+Verification included desktop and phone browser inspection, overflow checks, keyboard focus containment, Escape dismissal, focus restoration through the drawer and dialog, the skip link, and console inspection. The first test run exposed an animation-timing issue in the assertion; the test now waits for `afterClosed()`. The first build exposed a component stylesheet budget warning; the decorative illustration was moved into a local SVG. Review identified low contrast on the small stage numbers, which was corrected.
+
+Final build and test results are recorded in [the progress log](PROGRESS.md). Candidate code review, explanation, and learner exercises remain unrecorded.

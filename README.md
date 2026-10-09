@@ -1,6 +1,6 @@
 # Merchant Portal
 
-An Angular merchant onboarding application being built in guided checkpoints. The foundation currently renders a responsive starting page using Angular Material. Authentication, the mock API, and application workflows are not implemented yet.
+An Angular merchant onboarding application being built in guided checkpoints. The current UI includes a responsive navigation shell, a lazy-loaded workspace overview, a shared Material/SCSS theme, and an application preparation checklist dialog. Authentication, the mock API, and application workflows are not implemented yet.
 
 ## Run locally
 
@@ -11,7 +11,7 @@ npm ci
 npm start
 ```
 
-Open <http://localhost:4200>. The current frontend needs no environment variables or running backend. The pre-existing `.env.example` is unrelated to this foundation and is not loaded; it will be replaced when the mock API configuration is implemented.
+Open <http://localhost:4200>; the router redirects to `/overview`. The current frontend needs no environment variables or running backend. The pre-existing `.env.example` is unrelated to this foundation and is not loaded; it will be replaced when the mock API configuration is implemented.
 
 ## Commands
 
@@ -28,15 +28,19 @@ Open <http://localhost:4200>. The current frontend needs no environment variable
 
 - `src/main.ts` starts the standalone Angular application.
 - `src/app/app.config.ts` registers application providers, including the router.
-- `src/app/app.routes.ts` will define the feature routes; it is currently empty.
-- `src/app/app.ts`, `app.html`, and `app.scss` define the starting page.
+- `src/app/app.routes.ts` registers the lazy `/overview` route and the root redirect.
+- `src/app/app.ts`, `app.html`, and `app.scss` define the responsive shell and navigation.
+- `src/app/features/workspace/` contains the overview page and preparation checklist dialog.
+- `src/styles/_tokens.scss` defines shared colors, spacing, radii, and typography.
+- `public/application-illustration.svg` is a decorative local illustration; it represents no merchant record.
 - `src/styles.scss` defines the Material theme and global styles. Fonts are local system fonts, so building does not need a font download.
-- `src/app/app.spec.ts` is the first TestBed rendering smoke test.
+- `src/app/app.spec.ts` checks real route rendering and the checklist open/close interaction with TestBed.
 
-The initial test verifies component and template wiring. It does not yet exercise business behavior. Tests for permissions, concurrent token refresh, form validation, and draft saving will accompany those implementations.
+The current tests verify the root redirect, lazy page rendering, active navigation, and checklist dialog opening/closing. They do not yet exercise business behavior. Tests for permissions, concurrent token refresh, form validation, and draft saving will accompany those implementations.
 
 ## Documentation maintained with each checkpoint
 
+- [Design guide](docs/DESIGN.md): visual rules, design tokens, responsive behavior, and accessibility.
 - [Architecture](docs/ARCHITECTURE.md): decisions, assumptions, and responsibilities.
 - [Learning log](docs/LEARNING_LOG.md): explanations and small exercises.
 - [Progress](docs/PROGRESS.md): implemented work, verification results, and next steps.
