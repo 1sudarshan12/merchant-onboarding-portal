@@ -1,6 +1,6 @@
 # Progress
 
-Last updated: 9 October 2026.
+Last updated: 10 October 2026.
 
 ## Completed
 
@@ -40,14 +40,33 @@ Verification:
 
 This is the visual foundation. It does not yet implement the application dashboard, server pagination, login, permission enforcement, draft saving, or reviews. Next work is the domain/API contract and mock server.
 
+## Checkpoint 3: Domain contracts and mock API
+
+Implemented shared application/user/request/response models, role and record permission helpers, and an Express mock API. Five demo users and 30 synthetic applications exercise all workflow statuses. The API supports login, expiring access tokens, rotating refresh tokens, logout, scoped pagination/filtering, versioned draft saves, submission validation, admin assignments, reviewer decisions, masked responses, and permission-checked reveal.
+
+Added `npm run dev`, separate Node tests/type checking, Angular's `/api/**` proxy, and optional environment controls for latency, expiry, and one-time list/save failures. Replaced the unrelated environment template. Updated setup/architecture/learning notes and added API and security documentation.
+
+Verification:
+
+- API and shared permissions: `npm run test:api` passed 25 tests (20 HTTP scenarios and five permission tests).
+- Strict API/shared/test types: `npm run typecheck:api` passed.
+- Angular TestBed: `npm run test:ci` passed both existing route/dialog tests.
+- Production build: `npm run build` passed without warnings; initial browser bundle remains 435.48 kB, workspace chunk 7.76 kB.
+- Live HTTP through Angular on temporary port 4201: health, login, scoped page of five out of 15 SALES records, logout, and revoked-token rejection all passed. Temporary verification servers were stopped afterwards.
+- The default `npm run dev` launched the API but detected the existing Angular server occupying 4200 and stopped its child processes as configured. The separate-server check used 4201 to preserve that existing process. Stop an earlier Angular server before starting `npm run dev`.
+- Formatting: `npm run format:check` passed.
+
+The initial API test attempt hit sandbox restrictions on local listening; the same tests passed with local networking permitted. A startup check also exposed a misleading success message when Express's listen callback received an error; startup now uses Node's HTTP server so success is logged only after listening.
+
+This completes the backend implementation portion of Checkpoint 3. Frontend login, refresh coordination, guards, dashboard, autosave, and review pages are still future work. Candidate review and learner exercises remain unrecorded.
+
 ## Future checkpoints
 
-1. Settle the shared role, workflow, model, and API contracts; start the mock API with synthetic data.
-2. Implement authentication, concurrent-401 refresh, and access control with focused tests.
-3. Build the responsive dashboard with server-side pagination, filtering, and error/retry behavior.
-4. Build the application wizard, validation, masked draft restoration, and reliable autosave.
-5. Add application detail, assigned reviews, admin assignments, and controlled sensitive-field reveal.
-6. Complete accessibility and responsive checks, security documentation, meaningful regression tests, and submission preparation.
+4. Implement frontend authentication, concurrent-401 refresh, and access control with focused tests.
+5. Build the responsive dashboard with server-side pagination, filtering, and error/retry behavior.
+6. Build the application wizard, validation, masked draft restoration, and reliable autosave.
+7. Add application detail, assigned reviews, admin assignments, and controlled sensitive-field reveal.
+8. Complete accessibility and responsive checks, security documentation, meaningful regression tests, and submission preparation.
 
 Update documentation and record verification during each checkpoint. Counts and real-time updates remain optional; prioritize completing the required workflows.
 

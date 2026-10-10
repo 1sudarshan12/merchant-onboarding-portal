@@ -36,3 +36,11 @@ Codex implemented the responsive shell, lazy workspace route, SCSS design tokens
 Verification included desktop and phone browser inspection, overflow checks, keyboard focus containment, Escape dismissal, focus restoration through the drawer and dialog, the skip link, and console inspection. The first test run exposed an animation-timing issue in the assertion; the test now waits for `afterClosed()`. The first build exposed a component stylesheet budget warning; the decorative illustration was moved into a local SVG. Review identified low contrast on the small stage numbers, which was corrected.
 
 Final build and test results are recorded in [the progress log](PROGRESS.md). Candidate code review, explanation, and learner exercises remain unrecorded.
+
+## Checkpoint 3 assistance
+
+Codex implemented the shared domain/API contracts, permission helpers, fictional seed data, runtime validation, mock HTTP server, opaque token sessions, safe response mapping, workflow endpoints, and API/permission tests. Subagents worked on bounded server, validation/seed, and test tasks. Codex also configured local startup, the Angular development proxy, API type checking, and optional fault controls, and maintained README, API, architecture, learning, progress, and security documentation.
+
+Verification on 10 October 2026: 25 API/permission tests and two Angular TestBed tests passed, strict API type checking passed, and the production build passed without warnings. A live check through Angular's proxy verified health, login, scoped pagination, logout, and revoked-token rejection. Local network access required sandbox approval. The existing Angular process occupied port 4200, so the live check used a temporary server on 4201. A startup check found and corrected a misleading success log on a listen failure.
+
+The API tests do not demonstrate client-side concurrent refresh, forms, autosave, or role-aware pages; those are later checkpoints. Candidate review, explanation, and learner exercises remain unrecorded.

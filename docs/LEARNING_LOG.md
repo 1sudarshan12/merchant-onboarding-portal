@@ -90,6 +90,56 @@ Browser checks additionally exercised mobile navigation, dialog focus containmen
 
 **Learner exercise status:** Not yet recorded. These notes document implementation and verification by Codex, not a claim that the candidate has already reviewed or understood every change.
 
+## Checkpoint 3 — Contracts, permissions, and the mock API
+
+**Implemented:** Shared models and permission helpers, a local API with 30 fictional applications and five demo users, expiring/rotating sessions, scoped lists, versioned draft writes, submission/review transitions, masked responses, and controlled reveal. The [API contract](API.md) describes every request. The visible Angular pages have not connected to it yet.
+
+### Read one request from end to end
+
+Start with `PATCH /api/applications/:id` in `mock-api/app.ts`:
+
+1. `requireAuth` resolves the bearer token to a user. Authentication answers “Who is making this request?”
+2. Role, ownership, and status checks decide whether this user can edit this particular draft. Authorization answers “Is that action allowed here?”
+3. `objectBody` and `parseFormPatch` reject unknown fields and incorrect runtime types. TypeScript alone cannot protect an HTTP boundary because the caller can send arbitrary JSON.
+4. `checkVersion` rejects an outdated copy; `mergeForm` preserves fields omitted by the patch.
+5. The server updates the record, increments its version, and constructs a masked public response.
+
+The frontend will hide unavailable controls for clarity, but calling the API directly must still fail when permission is missing.
+
+### Saving a draft is different from submitting it
+
+A user can save while an email is incomplete or a required field is blank. Therefore draft validation checks the shape and safe bounds of data; submission checks business completeness. The latter can return several dotted field errors so the future form can show them beside their inputs.
+
+Optimistic concurrency means sending the version you last read. If two requests both use version 1, the first accepted write creates version 2. The second gets 409 and must not silently overwrite the newer data. The future autosave coordinator must retain the user's local edits when that happens.
+
+### A masked value is display information
+
+`•••• 1001` tells the user that an account value is already saved. It is not an account number to put into an editable form control. `ApplicationDetail` separates `sensitive` metadata from `form`; unchanged secret fields are omitted from patches. The server retains their actual values and validates them on submission.
+
+Account numbers use `string`, even though they contain digits: converting `0000000000001001` to a number would lose leading zeros. Processing amounts, which participate in comparisons, use `number`.
+
+### Understand the error before choosing the UI response
+
+| Status | Meaning                                                         | Later frontend behavior                                        |
+| ------ | --------------------------------------------------------------- | -------------------------------------------------------------- |
+| 401    | Session credential is absent, expired, or invalid.              | Attempt coordinated refresh, or return to login.               |
+| 403    | The authenticated user lacks permission.                        | Explain the restriction; do not try refreshing to gain a role. |
+| 409    | The record changed or the workflow state disallows the action.  | Preserve local edits and resolve/reload the conflicting state. |
+| 422    | The request cannot complete because business validation failed. | Show relevant field errors.                                    |
+| 503    | Temporary simulated failure.                                    | Keep current state and offer retry.                            |
+
+The current tests use an injected clock for expiration, rather than waiting 30 seconds. HTTP integration tests use a fresh in-memory app for each case. Angular TestBed remains responsible for component behavior; Node API tests have their own Vitest configuration.
+
+### Try it yourself
+
+1. Run `npm run dev`. Visit `http://localhost:4200/api/health`; explain how the Angular proxy reaches port 3000.
+2. Read `shared/models.ts`, then find where `responses.ts` turns an internal record into an `ApplicationDetail`. Identify the fields it deliberately omits.
+3. In a REST client, sign in as `sales1@example.test` with `Demo#1234`, then read `app-001` using the returned bearer token. The [API contract](API.md) contains the paths and payload shapes.
+4. PATCH its legal name using the current version. Repeat the same PATCH with the old version and observe 409. Refresh your access token if it expires during the exercise.
+5. Try reading `app-002` as that sales user and explain the 403. Then explain why a hidden Edit button would not be enough protection.
+
+**Learner exercise status:** Not yet recorded. Review one endpoint and its test before moving on; these notes do not claim you have already completed the exercises.
+
 ## Next checkpoint
 
-Define the application types, role permissions, status transitions, and API contract. Then start the mock API using synthetic data, with server authorization tests. No additional decorative pages are planned; subsequent UI work should support the required dashboard, form, and review tasks.
+Checkpoint 4 connects Angular to authentication: login UI, session state, the bearer/refresh interceptor, and route access control. We will specifically test that simultaneous 401 responses share one refresh request and that a failed retry does not accidentally clear a valid session.
