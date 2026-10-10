@@ -69,4 +69,10 @@ Live checks restored seeded `app-001`, exercised an injected save 503 without lo
 
 Verification identified and corrected OnPush touched-field error rendering, preservation of server validators across step mounts, retention of server errors until changes in their own section, and incorrect saved-state reporting for values outside draft wire bounds. Detailed implementation and learning notes are maintained in [Wizard](WIZARD.md), [Progress](PROGRESS.md), and the learning log.
 
-Before implementation, the branch `feat/application-wizard` was fast-forwarded to the user's existing checkpoint 5 commit `16bca90`, which it initially lacked. No new commit, push, publication, invitation, or external communication was performed. Candidate independent review, understanding, explanation, and exercise completion remain unrecorded. Application detail, reviewer decisions, administrator assignments, and sensitive-field reveal UI remain checkpoint 7 work.
+Before implementation, the branch `feat/application-wizard` was fast-forwarded to the user's existing checkpoint 5 commit `16bca90`, which it initially lacked. No new commit, push, publication, invitation, or external communication was performed. Candidate independent review, understanding, explanation, and exercise completion remain unrecorded.
+
+## Checkpoint 7 assistance
+
+Codex implemented the lazy application detail page, role-aware assignment and decision forms, risk history, masked sensitive-field presentation, explicit reviewer/admin reveal, dashboard detail links, and focused TestBed coverage. Verification found and corrected an event-handler lifecycle mistake: `takeUntilDestroyed()` now receives the component `DestroyRef` when called outside the constructor injection context.
+
+Verification: 80 Angular tests passed across 10 files and the production build passed after the detail chunk was added. Live Reviewer checks covered scoped assigned applications, masked-to-revealed banking values, and rejection-note validation. Live Admin checks assigned Demo Reviewer 02 to submitted `app-027`, moving it to IN_REVIEW. The API contract and earlier 25 API tests were unchanged. Candidate explanation and exercises remain to be completed.

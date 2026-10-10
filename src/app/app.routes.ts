@@ -42,6 +42,14 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'applications/:id',
+        title: 'Application detail | Merchant Portal',
+        loadComponent: () =>
+          import('./features/application-detail/application-detail').then(
+            (m) => m.ApplicationDetailPage,
+          ),
+      },
+      {
         path: 'applications',
         title: 'Applications | Merchant Portal',
         loadComponent: () =>

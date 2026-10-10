@@ -223,6 +223,27 @@ A restored account field is blank, with a separate saved-value hint. An untouche
 
 **Learner exercise status:** Not yet recorded. Review the code and try these steps before treating the implementation as something you can explain in an interview.
 
-## Next checkpoint
+## Checkpoint 7 — Detail, assignment, review, and reveal
 
-Checkpoint 7 adds the application detail page, risk history, administrator assignment, reviewer decisions, and controlled sensitive-field reveal.
+**Implemented:** A shared application detail route with public summaries, risk history, ADMIN assignment, assigned-REVIEWER decisions, and explicit ADMIN/assigned-REVIEWER banking reveal. Read [the detail guide](DETAIL.md).
+
+### UI permissions explain; APIs enforce
+
+The page hides controls that do not apply to the current role, which makes the workflow understandable. That is a user experience decision, not an authorization boundary. The API checks the role, record scope, lifecycle state, and version again for every assignment, decision, and reveal request. A malicious client can call the endpoint directly, so the server must remain correct when the UI is bypassed.
+
+### Reveal is a deliberate, temporary action
+
+The normal detail response contains only masks. The user must choose Reveal before the browser receives raw banking values. The component stores them only in memory and offers Hide values; it does not put them in a URL, local storage, or the default page model. This reduces accidental exposure while still supporting the reviewer task.
+
+### Versioned workflow transitions
+
+Assignment and decision requests include the version last read. If another admin or reviewer changes the record first, the stale request gets a conflict instead of overwriting the newer state. The current UI asks the user to reload, because silently merging a decision or reviewer identity would be unsafe.
+
+### Try it yourself
+
+1. Sign in as Reviewer and open an assigned IN_REVIEW application. Compare the masked values before and after Reveal, then Hide them again.
+2. Select Reject without a note and observe the local validation. Add a reason and explain which fields the API still validates.
+3. Sign in as Admin, open a Submitted application, assign a reviewer, then return to the list and observe its IN_REVIEW status.
+4. Read `application-detail.ts` and identify which checks are UX signals and which checks are delegated to the API.
+
+**Learner exercise status:** Not yet recorded. Passing tests and live checks do not replace your own explanation of the permission and data-exposure decisions.

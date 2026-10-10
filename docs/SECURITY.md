@@ -32,7 +32,7 @@ Autosave serializes versioned writes and pauses on conflict. Neither cancelled r
 
 ## Remaining frontend and deployment work
 
-General application detail, administrator/reviewer actions, and temporary sensitive-field reveal remain future screens. Their record-level checks already belong to the API and must also guide the eventual UI.
+The application detail, administrator/reviewer actions, and temporary sensitive-field reveal are implemented in Checkpoint 7. Their record-level checks remain enforced by the API as well as reflected in the UI.
 
 Avoid placing tokens or raw sensitive values in URLs, logs, or browser persistence. Rendering should use Angular's normal escaped bindings, without bypassing sanitization. A production authentication design should choose its cookie/token storage strategy alongside the backend, including CSRF protections when cookie credentials are used.
 

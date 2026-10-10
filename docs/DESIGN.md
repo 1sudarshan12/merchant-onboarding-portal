@@ -6,7 +6,7 @@ The portal should help users find an application, understand its state, and comp
 
 Checkpoint 2 established the responsive shell, lazy workspace overview, and Material preparation-checklist dialog. Checkpoint 4 adds the sign-in form, real authenticated identity, protected shell, and sign out. Checkpoint 5 adds `/applications`: a server-backed list with search, status filtering, pagination, and useful result states. Checkpoint 6 adds New application and own-draft editing for SALES, with a five-step form and submission.
 
-The default authenticated destination remains `/overview`, and Applications has its own navigation link. The shell's breadcrumb follows the route. The overview and checklist explain the workflow; they do not create records. The list now offers real New application and Edit draft actions where permitted. General application detail and administrator/reviewer screens remain future work; merchant names are not placeholder links.
+The default authenticated destination remains `/overview`, and Applications has its own navigation link. The shell's breadcrumb follows the route. The overview and checklist explain the workflow; they do not create records. The list now offers real New application, Edit draft, and detail links where permitted. Detail and administrator/reviewer actions are implemented as the next workflow layer.
 
 Do not display an invented signed-in role, fabricated counts, or buttons that suggest unavailable actions work. Add feature navigation and actions when their destinations and behavior exist.
 

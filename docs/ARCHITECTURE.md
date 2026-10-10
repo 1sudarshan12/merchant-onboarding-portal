@@ -29,7 +29,7 @@ Tailwind could be an additional styling tool, but replacing the specified stack 
 
 ## Roles and workflow implemented by the mock API
 
-These are conservative implementation assumptions, not extra requirements from the assignment. Checkpoint 3 implements them in the mock API and shared permission helpers. The supplied plans disagree about ADMIN permissions; frontend authentication, the dashboard, and the SALES draft wizard consume that contract. Administrator/reviewer action screens remain future work.
+These are conservative implementation assumptions, not extra requirements from the assignment. Checkpoint 3 implements them in the mock API and shared permission helpers. The supplied plans disagree about ADMIN permissions; frontend authentication, the dashboard, the SALES draft wizard, and the Checkpoint 7 detail actions consume that contract.
 
 | Actor    | Permitted actions                                                                                   |
 | -------- | --------------------------------------------------------------------------------------------------- |
@@ -50,7 +50,7 @@ Route guards protect the authenticated workspace. The dashboard is available to 
 - **Sensitive data:** Use synthetic data only. Keep raw values out of URLs, logs, browser persistence, and default detail responses. Role checks belong on the reveal endpoint as well as in the UI.
 - **CSP:** Explain it as defense in depth. A production policy must protect the served HTML document; setting a header only on JSON API responses does not protect the Angular page. CSP does not replace authorization or safe rendering.
 
-Checkpoint 3 implemented backend masking, authorization, version conflicts, and token expiry/rotation. Frontend refresh coordination is implemented in checkpoint 4 and used by the checkpoint 5 dashboard. Client autosave and safe draft restoration are implemented in checkpoint 6. Reviewer reveal controls and the served document's CSP remain future work.
+Checkpoint 3 implemented backend masking, authorization, version conflicts, and token expiry/rotation. Frontend refresh coordination is implemented in checkpoint 4 and used by the checkpoint 5 dashboard. Client autosave and safe draft restoration are implemented in checkpoint 6. Checkpoint 7 adds the reviewer/admin detail actions and controlled reveal; the served document still needs a production CSP.
 
 ## Scope boundary
 
@@ -94,7 +94,7 @@ Angular's development proxy keeps browser API URLs relative. The Node API and it
 
 A changed query cancels the previous read immediately, including while the next search is debouncing. Errors are caught inside the request flow, preserving later filters and retries. Explicit loading, success, and error states drive the template; success also handles empty results and an out-of-range page. The store is destroyed with the page, and filters are not persisted or synchronized to URL query parameters. See [dashboard behavior](DASHBOARD.md).
 
-The dashboard renders summaries and now offers New application to SALES and Edit draft for an own DRAFT. It does not offer administrator assignment, reviewer decisions, or general detail links yet. Current verification results belong in [the progress log](PROGRESS.md).
+The dashboard renders summaries, links every merchant to its detail page, and offers New application to SALES plus Edit draft for an own DRAFT. Detail actions remain role- and state-aware. Current verification results belong in [the progress log](PROGRESS.md).
 
 ## Checkpoint 6: merchant drafts and submission
 
