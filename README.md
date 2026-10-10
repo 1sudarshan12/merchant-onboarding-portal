@@ -1,6 +1,6 @@
 # Merchant Portal
 
-An Angular merchant onboarding application being built in guided checkpoints. The foundation currently renders a responsive starting page using Angular Material. Authentication, the mock API, and application workflows are not implemented yet.
+An Angular merchant onboarding application being built in guided checkpoints. The current UI includes sign-in, a protected responsive workspace, an application dashboard with server pagination, merchant search, status filters, and recovery states, a SALES draft wizard with validation/autosave/masked restoration, and role-aware application detail, assignment, review-decision, and controlled reveal screens. The mock API enforces the same permission and version rules as the UI.
 
 ## Run locally
 
@@ -8,40 +8,68 @@ The development environment used for this checkpoint is Node.js 24.14.0 and npm 
 
 ```bash
 npm ci
-npm start
+npm run dev
 ```
 
-Open <http://localhost:4200>. The current frontend needs no environment variables or running backend. The pre-existing `.env.example` is unrelated to this foundation and is not loaded; it will be replaced when the mock API configuration is implemented.
+Open <http://localhost:4200>. An anonymous visitor reaches `/login`; choose a demo account and sign in. The default destination is `/overview`; choose **Applications** in the sidebar to open `/applications`. A direct visit to `/applications` returns there after login. The command runs Angular on port 4200 and the mock API on `127.0.0.1:3000`. Stop any earlier `npm start` process first to free port 4200. Angular proxies `/api/**` to the API; restart Angular after a proxy change. `npm run dev` stops both child processes if either exits.
+
+No environment variables are required. The optional `.env.example` documents latency, token expiry, and one-time error settings; copy it to `.env` to change them. All data is fictional and resets when the API restarts. Frontend sessions are held only in memory, so reloading the browser requires another login. API records remain until the API restarts.
+
+To try the wizard, sign in as Sales and choose **New application**, then **Create draft**. Existing own drafts show **Edit draft** in Applications. The five steps are Business, Contact, Banking, Processing, and Review. Confirmed saves remain on the mock server until it restarts; unconfirmed local edits are not persisted in the browser. See [the wizard guide](docs/WIZARD.md) for saving and conflict behavior.
+
+Demo accounts: `sales1@example.test`, `sales2@example.test`, `reviewer1@example.test`, `reviewer2@example.test`, and `admin@example.test`. All use the public demo password `Demo#1234`. See the [API contract](docs/API.md) for login requests, endpoint details, permissions, and sample records.
 
 ## Commands
 
-| Command                | Purpose                                                      |
-| ---------------------- | ------------------------------------------------------------ |
-| `npm start`            | Run the Angular development server.                          |
-| `npm run build`        | Create a production build in `dist/merchant-portal/browser`. |
-| `npm test`             | Run component tests in watch mode.                           |
-| `npm run test:ci`      | Run Vitest tests once through Angular's test builder.        |
-| `npm run format:check` | Check source and documentation formatting.                   |
-| `npm run format`       | Format source and documentation.                             |
+| Command                 | Purpose                                                          |
+| ----------------------- | ---------------------------------------------------------------- |
+| `npm start`             | Run the Angular development server.                              |
+| `npm run dev`           | Run Angular and the mock API together.                           |
+| `npm run start:api`     | Run only the mock API.                                           |
+| `npm run build`         | Create a production build in `dist/merchant-portal/browser`.     |
+| `npm test`              | Run component tests in watch mode.                               |
+| `npm run test:ci`       | Run Vitest tests once through Angular's test builder.            |
+| `npm run test:api`      | Run API integration and shared permission tests in Node.         |
+| `npm run typecheck:api` | Strictly type-check mock API, shared contracts, and their tests. |
+| `npm run format:check`  | Check source and documentation formatting.                       |
+| `npm run format`        | Format source and documentation.                                 |
 
 ## Read the code
 
 - `src/main.ts` starts the standalone Angular application.
-- `src/app/app.config.ts` registers application providers, including the router.
-- `src/app/app.routes.ts` will define the feature routes; it is currently empty.
-- `src/app/app.ts`, `app.html`, and `app.scss` define the starting page.
+- `src/app/app.config.ts` registers the router and `HttpClient` with the authentication interceptor.
+- `src/app/app.routes.ts` defines public login and guarded lazy workspace routes.
+- `src/app/app.ts`, `app.html`, and `app.scss` provide the root router outlet.
+- `src/app/layout/workspace-shell.*` defines authenticated navigation, the current identity, dynamic breadcrumbs, and sign out.
+- `src/app/core/auth/` contains session state, the bearer/refresh interceptor, guards, and safe return navigation.
+- `src/app/features/auth/` contains the typed login form.
+- `src/app/features/applications/` contains the dashboard, its page-scoped store, and list API service.
+- `src/app/features/application-wizard/` contains the typed merchant form, five-step flow, serialized autosave, draft API, and leave-confirmation dialog.
+- `src/app/features/workspace/` contains the overview page and preparation checklist dialog.
+- `src/styles/_tokens.scss` defines shared colors, spacing, radii, and typography.
+- `public/application-illustration.svg` is a decorative local illustration; it represents no merchant record.
 - `src/styles.scss` defines the Material theme and global styles. Fonts are local system fonts, so building does not need a font download.
-- `src/app/app.spec.ts` is the first TestBed rendering smoke test.
+- `src/app/app.spec.ts` uses the actual application providers, real authentication service, and an HTTP test backend to check login, guarded navigation, bearer headers, dashboard rendering, the checklist, and logout.
+- `shared/models.ts` defines API request/response types; `shared/permissions.ts` defines reusable role and record permission predicates.
+- `mock-api/server.ts` starts the server; `app.ts` defines HTTP behavior; `auth.ts` manages expiring sessions.
+- `mock-api/validation.ts` validates incoming data at runtime; `responses.ts` constructs safe public responses; `seed.ts` supplies fictional records.
+- `mock-api/app.spec.ts` exercises the API over HTTP; `shared/permissions.spec.ts` checks permission rules.
 
-The initial test verifies component and template wiring. It does not yet exercise business behavior. Tests for permissions, concurrent token refresh, form validation, and draft saving will accompany those implementations.
+Tests are written for frontend authentication and concurrent refresh, real application wiring, dashboard request cancellation and retry, server-side permissions, pagination, masking, validation, version conflicts, workflow transitions, and detail reveal/review interactions. See the progress log for executed checks and results. Wizard tests cover masked restoration, validators, serialized autosave, final-save-before-submit, conflicts, and navigation safeguards.
 
 ## Documentation maintained with each checkpoint
 
+- [Design guide](docs/DESIGN.md): visual rules, design tokens, responsive behavior, and accessibility.
 - [Architecture](docs/ARCHITECTURE.md): decisions, assumptions, and responsibilities.
+- [Authentication](docs/AUTHENTICATION.md): session state, guarded navigation, shared refresh, and logout races.
+- [Dashboard](docs/DASHBOARD.md): server-driven queries, request cancellation, result states, and permitted draft actions.
+- [Wizard](docs/WIZARD.md): typed forms, draft restoration, autosave, conflicts, submission, and leaving safely.
+- [API contract](docs/API.md): setup, demo accounts, requests, responses, validation, and errors.
+- [Security notes](docs/SECURITY.md): implemented controls, mock limitations, and remaining frontend/deployment work.
 - [Learning log](docs/LEARNING_LOG.md): explanations and small exercises.
 - [Progress](docs/PROGRESS.md): implemented work, verification results, and next steps.
 - [AI assistance](docs/AI_USAGE.md): assistance received and the verification actually performed.
 
-Each implementation checkpoint must update the relevant notes and record the checks run. Planned features are kept distinct from implemented behavior. Security documentation will grow alongside authentication and sensitive-data handling.
+Each implementation checkpoint updates the relevant notes and records the checks run. Planned features are kept distinct from implemented behavior.
 
 This is a private take-home project. Submission preparation and reviewer access remain future work.

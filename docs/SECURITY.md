@@ -1,0 +1,43 @@
+# Security notes
+
+## Server controls implemented in checkpoint 3
+
+The mock API authenticates protected requests and enforces role, ownership, assignment, and workflow state on the server. List scope is applied before filtering, pagination, and totals. Draft patches use nested field allowlists, so client-supplied owner, status, role, and history fields cannot change internal records. Runtime validation complements TypeScript, whose types do not validate incoming JSON.
+
+Access and refresh tokens are random opaque values. Refresh rotates both tokens, invalidating the previous pair. Access tokens expire after 30 seconds by default; refresh expiration is fixed from login. Logout revokes the session matching the supplied current refresh token. Tokens are not logged by the application.
+
+Ordinary application responses explicitly construct public fields and masked banking metadata. The reveal endpoint returns stored account/tax values only to ADMIN or the assigned REVIEWER. SALES can replace sensitive values in its own drafts but cannot read stored raw values. All API responses use `Cache-Control: no-store`; request bodies are limited to 32 kB and errors omit stack traces and submitted values.
+
+The server binds to loopback and has no cross-origin permission headers. Angular's development proxy supplies same-origin `/api` access. The demo stores only fictional identities and banking values.
+
+## Limits of this mock
+
+This server exists to demonstrate frontend behavior. It uses published demo credentials, keeps unencrypted data and sessions in process memory, and resets on restart. It has no persistent audit store, production identity provider, password hashing, login rate limiting, or deployment setup. Do not use it with real merchant information or expose it as a production service.
+
+Optimistic versions prevent stale writes within the single server process. A real backend needs atomic database updates and durable storage. Banking validation is intentionally simplified and is not a statement of jurisdiction-specific financial requirements.
+
+The API returns 403 for an existing record outside the user's scope and 404 for an unknown record. This intentionally distinguishes those conditions in the demo. A production policy may choose uniform 404 responses to reduce record-existence disclosure.
+
+## Frontend controls implemented through checkpoint 6
+
+`app.config.ts` registers the bearer interceptor and guarded application routes. Public login sits outside the authenticated workspace shell. Frontend session state is memory-only; browser reload requires sign-in again. The interceptor attaches credentials only to normalized root-relative protected API URLs, coordinates one refresh for concurrent 401s, and retries once. Login, logout, refresh, and health requests are excluded from that handling. Session revisions prevent stale responses from restoring a previous user. Server logout is best effort after immediate local session clearing.
+
+Safe return navigation permits `/overview`, `/applications`, `/applications/new`, and edit paths matching `/applications/app-[a-z\d-]+/edit`, with the accepted route's query and fragment preserved. Other destinations fall back to overview. This controls navigation; it does not make route parameters an authorization source.
+
+The dashboard receives only server-scoped summaries. It does not download a global dataset and hide unauthorized rows in the browser. Filtering and totals follow the server's role scope. Results and query state are scoped to each route visit, and pending list reads are cancelled when a newer query takes over or the page is destroyed. Banking values are absent from list responses. See [authentication](AUTHENTICATION.md) and [dashboard behavior](DASHBOARD.md).
+
+The SALES wizard uses permission guards for new/edit routes and checks record ownership and DRAFT state after loading. Sensitive input restoration uses separate masked/present metadata and blank password controls. Unchanged secrets are omitted from writes; dirty values are replacements or explicit clears. Review summaries mask those values. Raw replacements remain only in the active form/coordinator memory and write body; the coordinator and banking controls clear them after successful submission. They are not put in browser persistence or URLs.
+
+Autosave serializes versioned writes and pauses on conflict. Neither cancelled requests nor navigation can promise rollback of an accepted write. Explicit navigation and sign out consult a pending-draft safeguard. Browser reload loses the memory-only session and any remaining unsaved edits; its native warning is advisory and is not a persistence mechanism. See [the wizard guide](WIZARD.md).
+
+## Remaining frontend and deployment work
+
+The application detail, administrator/reviewer actions, and temporary sensitive-field reveal are implemented in Checkpoint 7. Their record-level checks remain enforced by the API as well as reflected in the UI.
+
+Avoid placing tokens or raw sensitive values in URLs, logs, or browser persistence. Rendering should use Angular's normal escaped bindings, without bypassing sanitization. A production authentication design should choose its cookie/token storage strategy alongside the backend, including CSRF protections when cookie credentials are used.
+
+The assignment's CSP requirement remains future deployment work. A CSP must be delivered with the Angular HTML document and verified against the actual built application. A header on JSON responses alone does not protect that document. CSP is an additional browser defense and does not replace server authorization.
+
+## Verification
+
+The server HTTP tests cover login/expiry/rotation/logout, role and record scope, default masking and reveal restrictions, field allowlists, version conflicts, workflow transitions, and unchanged data after an injected failed save. Angular tests exercise concurrent refresh, session races, guarded navigation, and the real application provider configuration with a controlled HTTP backend. Dashboard tests exercise reads, cancellation, and error recovery. Wizard tests cover masking, explicit sensitive-field clearing, draft/submission validation, serialized writes, version conflicts, final-save-before-submit, and leave behavior. See [the progress log](PROGRESS.md) for executed results. These are bounded behavioral checks, not a penetration test or a claim that production security is complete.

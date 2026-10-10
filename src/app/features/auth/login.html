@@ -1,0 +1,112 @@
+<main class="login-layout">
+  <section class="welcome" aria-labelledby="welcome-heading">
+    <div class="brand">
+      <span class="brand-mark" aria-hidden="true">m<span>.</span></span>
+      <span>Merchant<span class="brand-caption">APPLICATION PORTAL</span></span>
+    </div>
+    <div class="welcome-copy">
+      <p class="eyebrow">MERCHANT ONBOARDING</p>
+      <h2 id="welcome-heading">A clear start.<br />A shared workspace.</h2>
+      <p>Sign in with the account assigned to your role.</p>
+      <div class="welcome-line" aria-hidden="true"></div>
+      <span>Sales. Review. Coordination.</span>
+    </div>
+    <p class="welcome-footer">Merchant Portal</p>
+  </section>
+
+  <section class="sign-in" aria-labelledby="sign-in-heading">
+    <div class="form-panel">
+      <p class="eyebrow">WELCOME BACK</p>
+      <h1 id="sign-in-heading">Sign in</h1>
+      <p class="introduction">Choose a demo account or enter your credentials.</p>
+
+      @if (expired) {
+        <p class="notice" role="status">Your session has expired. Please sign in again.</p>
+      }
+
+      <form [formGroup]="form" (ngSubmit)="submit()" novalidate [attr.aria-busy]="pending()">
+        <mat-form-field appearance="outline">
+          <mat-label>Email address</mat-label>
+          <input
+            matInput
+            type="email"
+            formControlName="email"
+            autocomplete="username"
+            autocapitalize="none"
+            spellcheck="false"
+            [readonly]="pending()"
+          />
+          @if (form.controls.email.touched && form.controls.email.invalid) {
+            <mat-error>
+              {{
+                form.controls.email.hasError('required')
+                  ? 'Enter your email address.'
+                  : 'Enter a valid email address.'
+              }}
+            </mat-error>
+          }
+        </mat-form-field>
+
+        <mat-form-field appearance="outline">
+          <mat-label>Password</mat-label>
+          <input
+            matInput
+            [type]="passwordVisible() ? 'text' : 'password'"
+            formControlName="password"
+            autocomplete="current-password"
+            [readonly]="pending()"
+          />
+          <button
+            mat-button
+            matSuffix
+            type="button"
+            class="password-toggle"
+            [attr.aria-label]="passwordVisible() ? 'Hide password' : 'Show password'"
+            [attr.aria-pressed]="passwordVisible()"
+            (click)="$event.stopPropagation(); passwordVisible.set(!passwordVisible())"
+          >
+            {{ passwordVisible() ? 'Hide' : 'Show' }}
+          </button>
+          @if (form.controls.password.touched && form.controls.password.invalid) {
+            <mat-error>Enter your password.</mat-error>
+          }
+        </mat-form-field>
+
+        @if (error(); as message) {
+          <p class="error-message" role="alert">{{ message }}</p>
+        }
+
+        <button mat-flat-button type="submit" class="submit-button" [disabled]="pending()">
+          {{ pending() ? 'Signing in…' : 'Sign in' }}
+        </button>
+        <span class="sr-only" role="status">{{ pending() ? 'Signing in. Please wait.' : '' }}</span>
+      </form>
+
+      <section class="demo-panel" aria-labelledby="demo-heading">
+        <div class="demo-heading">
+          <h2 id="demo-heading">Explore a demo role</h2>
+          <span>Fictional accounts</span>
+        </div>
+        <div class="demo-accounts">
+          @for (account of demoAccounts; track account.email) {
+            <button
+              type="button"
+              class="demo-account"
+              [disabled]="pending()"
+              [attr.aria-label]="'Use ' + account.label + ' demo account'"
+              (click)="fillDemo(account.email)"
+            >
+              <strong>{{ account.label }}</strong>
+              <span>{{ account.description }}</span>
+            </button>
+          }
+        </div>
+        <details>
+          <summary>Demo account details</summary>
+          <p>Select a role to fill the form, then choose Sign in.</p>
+          <p>All demo accounts use the public password <code>Demo#1234</code>.</p>
+        </details>
+      </section>
+    </div>
+  </section>
+</main>

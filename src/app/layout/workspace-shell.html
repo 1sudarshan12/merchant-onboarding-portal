@@ -1,0 +1,95 @@
+<a class="skip-link" href="#main-content" (click)="focusMainContent($event, mainContent)">
+  Skip to main content
+</a>
+
+<mat-sidenav-container class="shell">
+  <mat-sidenav
+    id="workspace-navigation"
+    class="sidebar"
+    [mode]="isMobile() ? 'over' : 'side'"
+    [opened]="!isMobile() || navigationOpen()"
+    [autoFocus]="isMobile() ? 'first-tabbable' : false"
+    [fixedInViewport]="true"
+    (closedStart)="closeNavigation()"
+  >
+    <a
+      class="brand"
+      routerLink="/overview"
+      (click)="closeNavigation()"
+      aria-label="Merchant Portal home"
+    >
+      <span class="brand-mark" aria-hidden="true">m<span>.</span></span>
+      <span>Merchant<span class="brand-subtitle">APPLICATION PORTAL</span></span>
+    </a>
+
+    <div class="nav-label">WORKSPACE</div>
+    <nav aria-label="Main navigation">
+      <a
+        class="nav-item"
+        routerLink="/overview"
+        routerLinkActive="nav-item--active"
+        ariaCurrentWhenActive="page"
+        (click)="closeNavigation()"
+      >
+        <app-icon name="grid" /> Overview
+      </a>
+      <a
+        class="nav-item"
+        routerLink="/applications"
+        routerLinkActive="nav-item--active"
+        ariaCurrentWhenActive="page"
+        (click)="closeNavigation()"
+      >
+        <app-icon name="document" /> Applications
+      </a>
+      <button class="nav-item" type="button" (click)="openChecklist()">
+        <app-icon name="checklist" /> Application checklist
+      </button>
+    </nav>
+
+    <div class="sidebar-note">
+      <span class="sidebar-note-icon"><app-icon name="document" /></span>
+      <p>From details to decisions.</p>
+      <span>A clear process for your merchant applications.</span>
+    </div>
+    <div class="sidebar-footer"><span class="footer-dot"></span> Merchant onboarding</div>
+  </mat-sidenav>
+
+  <mat-sidenav-content>
+    <header class="topbar">
+      <div class="topbar-start">
+        @if (isMobile()) {
+          <button
+            mat-icon-button
+            type="button"
+            aria-label="Open navigation"
+            aria-controls="workspace-navigation"
+            [attr.aria-expanded]="navigationOpen()"
+            (click)="navigationOpen.set(true)"
+          >
+            <app-icon name="menu" />
+          </button>
+        }
+        <span class="breadcrumb-parent">Workspace</span>
+        <span class="breadcrumb-divider" aria-hidden="true">/</span>
+        <span class="breadcrumb-current">{{ currentPage() }}</span>
+      </div>
+      <div class="session-actions">
+        @if (auth.user(); as user) {
+          <div class="session-identity">
+            <span class="user-name" [title]="user.name">{{ user.name }}</span>
+            <span class="user-role">{{ user.role }}</span>
+          </div>
+        }
+        <button mat-button type="button" (click)="signOut()">Sign out</button>
+      </div>
+    </header>
+    <main #mainContent id="main-content" tabindex="-1">
+      <router-outlet />
+    </main>
+    <footer class="page-footer">
+      <span>Merchant Portal</span>
+      <span>Prepare. Submit. Review.</span>
+    </footer>
+  </mat-sidenav-content>
+</mat-sidenav-container>

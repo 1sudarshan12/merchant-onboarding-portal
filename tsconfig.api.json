@@ -1,0 +1,12 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "module": "ESNext",
+    "moduleResolution": "bundler",
+    "types": ["node"],
+    "esModuleInterop": true,
+    "noEmit": true
+  },
+  "include": ["mock-api/**/*.ts", "shared/**/*.ts", "vitest.api.config.ts"],
+  "references": []
+}

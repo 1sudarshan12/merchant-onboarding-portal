@@ -1,0 +1,55 @@
+<div class="dialog-heading">
+  <h2 mat-dialog-title>Application checklist</h2>
+  <button mat-icon-button mat-dialog-close aria-label="Close application checklist">
+    <app-icon name="close" />
+  </button>
+</div>
+
+<mat-dialog-content>
+  <p class="introduction">
+    A preparation guide for your merchant application. Use clearly fictional business, contact, and
+    banking details for this demo.
+  </p>
+
+  <div class="checklist-groups">
+    <section aria-labelledby="business-checklist-heading">
+      <div class="section-heading">
+        <span class="section-number" aria-hidden="true">01</span>
+        <h3 id="business-checklist-heading">Business details</h3>
+      </div>
+      <ul>
+        <li>Legal business name and trading name</li>
+        <li>Business type and the products or services offered</li>
+        <li>Registration details, where applicable</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="contact-checklist-heading">
+      <div class="section-heading">
+        <span class="section-number" aria-hidden="true">02</span>
+        <h3 id="contact-checklist-heading">Contact and banking</h3>
+      </div>
+      <ul>
+        <li>A fictional contact name, email address, and phone number</li>
+        <li>Business address</li>
+        <li>Dummy bank and account details</li>
+      </ul>
+    </section>
+
+    <section aria-labelledby="processing-checklist-heading">
+      <div class="section-heading">
+        <span class="section-number" aria-hidden="true">03</span>
+        <h3 id="processing-checklist-heading">Processing profile</h3>
+      </div>
+      <ul>
+        <li>Estimated monthly processing volume</li>
+        <li>Typical and maximum transaction amounts</li>
+        <li>Whether international payments are expected</li>
+      </ul>
+    </section>
+  </div>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-flat-button mat-dialog-close>Got it</button>
+</mat-dialog-actions>

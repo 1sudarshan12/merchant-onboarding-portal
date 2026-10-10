@@ -1,0 +1,227 @@
+<a class="back-link" routerLink="/applications">← Applications</a>
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">MERCHANT ONBOARDING</p>
+    <h1 #pageHeading tabindex="-1">
+      {{
+        phase() === 'new'
+          ? 'New application'
+          : autosave.submitted()
+            ? 'Application submitted'
+            : 'Prepare application'
+      }}
+    </h1>
+    <p class="intro">Bring the merchant details together, one step at a time.</p>
+  </div>
+  @if (phase() === 'ready' && !autosave.submitted()) {
+    <div class="save-status" role="status" aria-live="polite" [attr.data-state]="autosave.state()">
+      <span class="status-dot" aria-hidden="true"></span>{{ saveLabel() }}
+    </div>
+  }
+</header>
+
+@switch (phase()) {
+  @case ('new') {
+    <section class="start-panel" aria-labelledby="start-title">
+      <p class="eyebrow">A PLACE TO BEGIN</p>
+      <h2 id="start-title">Start with a draft</h2>
+      <p>
+        We’ll create a private draft for your account. Fill in what you know; your changes save
+        automatically as you work.
+      </p>
+      <ol class="preparation-list">
+        <li>Business and contact details</li>
+        <li>Banking information, kept masked when you return</li>
+        <li>Expected processing amounts</li>
+      </ol>
+      <p class="helper">Use fictional merchant and banking details for this demo.</p>
+      @if (pageError()) {
+        <p class="error-message" role="alert">{{ pageError() }}</p>
+      }
+      <button mat-flat-button type="button" [disabled]="creating()" (click)="create()">
+        {{ creating() ? 'Creating draft…' : 'Create draft' }}
+      </button>
+    </section>
+  }
+  @case ('loading') {
+    <section class="start-panel" role="status" aria-busy="true">
+      <h2>Loading your draft…</h2>
+      <p>Getting the latest saved details.</p>
+    </section>
+  }
+  @case ('error') {
+    <section class="start-panel" role="alert">
+      <h2>Draft couldn’t load</h2>
+      <p>{{ pageError() }}</p>
+      <button mat-flat-button type="button" (click)="load()">Try again</button>
+    </section>
+  }
+  @case ('blocked') {
+    <section class="start-panel" role="alert">
+      <h2>Draft unavailable</h2>
+      <p>{{ pageError() }}</p>
+      <a mat-stroked-button routerLink="/applications">Back to applications</a>
+    </section>
+  }
+  @case ('ready') {
+    @if (autosave.submitted()) {
+      <section class="start-panel success-panel" role="status">
+        <p class="eyebrow">READY FOR THE NEXT STEP</p>
+        <h2>{{ autosave.detail()?.legalName }} is submitted</h2>
+        <p>
+          The application is saved and ready for an administrator to assign for review. It can no
+          longer be edited as a draft.
+        </p>
+        <a mat-flat-button routerLink="/applications">Back to applications</a>
+      </section>
+    } @else {
+      <nav class="step-navigation" aria-label="Application steps">
+        <ol>
+          @for (label of steps; track label; let i = $index) {
+            <li>
+              <button
+                type="button"
+                [attr.aria-current]="step() === i ? 'step' : null"
+                [disabled]="autosave.isSubmitting()"
+                (click)="goToStep(i)"
+              >
+                <span class="step-number">{{ i + 1 }}</span
+                ><span>{{ label }}</span>
+              </button>
+            </li>
+          }
+        </ol>
+      </nav>
+
+      @if (autosave.message()) {
+        <section class="notice error-message" role="alert">
+          <p>{{ autosave.message() }}</p>
+          @if (autosave.state() === 'error') {
+            <button mat-stroked-button type="button" [disabled]="!saveable()" (click)="save()">
+              Retry saving
+            </button>
+          }
+          @if (!autosave.isSubmitting() && autosave.state() !== 'saving') {
+            <button mat-button type="button" (click)="reloadServer()">Load server copy</button>
+          }
+        </section>
+      }
+      @if (!saveable()) {
+        <p class="notice error-message" role="alert">
+          Some values cannot be saved yet. Check text length, banking characters, and non-negative
+          processing amounts. Your edits stay in this form.
+        </p>
+      }
+      <form
+        class="wizard-panel"
+        [formGroup]="form"
+        (ngSubmit)="step() === 4 ? submit() : goToStep(step() + 1)"
+      >
+        <header class="section-heading">
+          <p class="eyebrow">STEP {{ step() + 1 }} OF 5 · DRAFT</p>
+          <h2 #stepHeading tabindex="-1">
+            {{ steps[step()] }}{{ step() === 4 ? ' your application' : ' details' }}
+          </h2>
+          <p>
+            {{
+              step() === 4
+                ? 'Check each section before submitting. Banking values remain masked.'
+                : 'Required fields are marked. You can save an incomplete draft and return later.'
+            }}
+          </p>
+        </header>
+        @if (validationNotice()) {
+          <p class="validation-notice" role="alert">{{ validationNotice() }}</p>
+        }
+
+        @if (step() < 4) {
+          <app-merchant-fields
+            [form]="form"
+            [step]="step()"
+            [sensitive]="sensitive()"
+            [serverErrors]="autosave.fieldErrors()"
+          />
+        } @else {
+          <div class="review-grid">
+            @for (section of reviewSections(); track section.title; let i = $index) {
+              <section class="review-section" [attr.aria-label]="section.title + ' summary'">
+                <div class="review-heading">
+                  <h3>{{ section.title }}</h3>
+                  <button
+                    mat-button
+                    type="button"
+                    [disabled]="autosave.isSubmitting()"
+                    (click)="goToStep(i)"
+                    [attr.aria-label]="'Edit ' + section.title.toLowerCase()"
+                  >
+                    Edit
+                  </button>
+                </div>
+                <dl>
+                  @for (field of section.fields; track field[0]) {
+                    <div>
+                      <dt>{{ field[0] }}</dt>
+                      <dd>{{ field[1] }}</dd>
+                    </div>
+                  }
+                </dl>
+              </section>
+            }
+          </div>
+          <p class="submission-note">
+            Submitting saves your latest changes first, then sends the application for review. You
+            won’t be able to edit it afterwards.
+          </p>
+        }
+
+        <footer class="wizard-actions">
+          <button
+            mat-stroked-button
+            type="button"
+            [disabled]="
+              !autosave.hasPending() ||
+              autosave.state() === 'saving' ||
+              autosave.state() === 'conflict' ||
+              autosave.isSubmitting() ||
+              !saveable()
+            "
+            (click)="save()"
+          >
+            Save draft
+          </button>
+          <div>
+            @if (step() > 0) {
+              <button
+                mat-button
+                type="button"
+                [disabled]="autosave.isSubmitting()"
+                (click)="goToStep(step() - 1)"
+              >
+                Back
+              </button>
+            }
+            <button
+              mat-flat-button
+              type="submit"
+              [disabled]="
+                autosave.isSubmitting() || (step() === 4 && autosave.state() === 'conflict')
+              "
+            >
+              {{
+                autosave.isSubmitting()
+                  ? 'Submitting…'
+                  : step() === 4
+                    ? 'Submit application'
+                    : 'Continue'
+              }}
+            </button>
+          </div>
+        </footer>
+      </form>
+      <p class="privacy-note">
+        Drafts are saved to the demo server. Refreshing requires sign-in again; unsaved changes are
+        not stored in your browser.
+      </p>
+    }
+  }
+}
