@@ -10,7 +10,7 @@ This is a working design record, not a claim that every feature exists. The orig
 | Templates        | Built-in `@if` / `@for` control flow                         | Required modern Angular patterns; use stable identities when rendering lists.                                                                                                        |
 | UI               | Angular Material with SCSS                                   | Allowed by the assignment. Provides consistent controls; labels, focus, responsive layout, and keyboard behavior still need verification.                                            |
 | State            | Signals for current UI state; RxJS for asynchronous flows    | Keep synchronous state simple while expressing HTTP, timing, and cancellation explicitly.                                                                                            |
-| Forms            | Typed Reactive Forms with custom validation                  | The typed login form is implemented. Merchant field contracts exist; the wizard and its custom form validation remain future work.                                                   |
+| Forms            | Typed Reactive Forms with custom validation                  | Typed login and merchant forms are implemented. Merchant submission validation includes field rules and processing-amount relationships, separate from draft-save bounds.            |
 | Tests            | Vitest and Angular TestBed                                   | Required. Begin with a component smoke test, then test important behavior as it is added.                                                                                            |
 | Routing          | Angular Router; lazy features and guards added with features | Public login and guarded lazy overview/applications routes are implemented; the root provider configuration registers the real authentication interceptor.                           |
 | Change detection | `OnPush` for application components                          | A project choice. Signals read by a template notify Angular when their values change; inputs and handled events also matter.                                                         |
@@ -21,7 +21,7 @@ Avoid adding abstractions or feature folders before there is code that needs the
 
 The assignment explicitly requests “Bootstrap 5 or Angular Material with SCSS responsive layouts.” Material and SCSS remain the current implementation choice because they match that requirement. Angular itself supports Tailwind; this is a requirement-driven choice, not an Angular restriction. See [Angular's Tailwind guide](https://angular.dev/guide/tailwind).
 
-The candidate raised a concern that the checkpoint 1 screen was too basic for a senior submission. Checkpoint 2 replaced it with a responsive shell, consistent design tokens, a workspace overview, and a checklist interaction. Checkpoints 4 and 5 add sign-in and an application dashboard. Creation and review workflows still need their UI. Passing tests alone does not establish visual quality.
+The candidate raised a concern that the checkpoint 1 screen was too basic for a senior submission. Checkpoint 2 replaced it with a responsive shell, consistent design tokens, a workspace overview, and a checklist interaction. Checkpoints 4 and 5 add sign-in and an application dashboard. Checkpoint 6 adds draft creation, editing, and submission; the administrator/reviewer workflow still needs its UI. Passing tests alone does not establish visual quality.
 
 Preserve the shared palette, typography hierarchy, spacing scale, control sizing, and focus treatment as features expand. The dashboard now uses readable application lists and explicit loading, empty, error, and retry states. Future forms need validation and save feedback. Avoid adding nonfunctional controls to make the scaffold appear complete.
 
@@ -29,7 +29,7 @@ Tailwind could be an additional styling tool, but replacing the specified stack 
 
 ## Roles and workflow implemented by the mock API
 
-These are conservative implementation assumptions, not extra requirements from the assignment. Checkpoint 3 implements them in the mock API and shared permission helpers. The supplied plans disagree about ADMIN permissions; frontend authentication and the dashboard now consume that contract; write and review screens remain future work.
+These are conservative implementation assumptions, not extra requirements from the assignment. Checkpoint 3 implements them in the mock API and shared permission helpers. The supplied plans disagree about ADMIN permissions; frontend authentication, the dashboard, and the SALES draft wizard consume that contract. Administrator/reviewer action screens remain future work.
 
 | Actor    | Permitted actions                                                                                   |
 | -------- | --------------------------------------------------------------------------------------------------- |
@@ -43,14 +43,14 @@ The exact scope, fields, endpoints, and transition rules are recorded in [the AP
 
 Route guards protect the authenticated workspace. The dashboard is available to all three roles and displays only the summaries returned by the server. The mock API already independently enforces role, ownership, assignment, and status checks. HTTP tests exercise direct calls, including forbidden actions.
 
-## Design constraints for later checkpoints
+## Design constraints and implementation status
 
-- **Autosave:** Debounce edits, but mark them unsaved immediately. Cancelling an HTTP subscription cannot undo a server write. Serialize writes, retain the latest pending snapshot, and handle version conflicts without discarding the form. Flush and await the final save before submission. Catch errors inside the ongoing save flow so subsequent edits can still save.
-- **Masked draft restoration:** Keep masked display values separate from form input values. Return stored-value presence metadata; accept either an existing sensitive value or a valid replacement. Omit unchanged sensitive fields from patches. Never save a string of masking characters as the real value.
+- **Autosave (implemented):** Edits become unsaved immediately and debounce for 700 ms. Writes serialize with one latest pending snapshot. Conflicts keep the form and pause saving; submission flushes and awaits the final save. Cancelling an HTTP subscription cannot undo a server write.
+- **Masked draft restoration (implemented):** Display metadata stays separate from blank editable secret controls. A pristine blank control may rely on an existing stored value. Dirty sensitive controls express replacement or explicit clearing intent; unchanged secrets are omitted from patches. Masks are never saved as real values.
 - **Sensitive data:** Use synthetic data only. Keep raw values out of URLs, logs, browser persistence, and default detail responses. Role checks belong on the reveal endpoint as well as in the UI.
 - **CSP:** Explain it as defense in depth. A production policy must protect the served HTML document; setting a header only on JSON API responses does not protect the Angular page. CSP does not replace authorization or safe rendering.
 
-Checkpoint 3 implemented backend masking, authorization, version conflicts, and token expiry/rotation. Frontend refresh coordination is implemented in checkpoint 4 and used by the checkpoint 5 dashboard. Client autosave, reveal controls, and the served document's CSP remain future work.
+Checkpoint 3 implemented backend masking, authorization, version conflicts, and token expiry/rotation. Frontend refresh coordination is implemented in checkpoint 4 and used by the checkpoint 5 dashboard. Client autosave and safe draft restoration are implemented in checkpoint 6. Reviewer reveal controls and the served document's CSP remain future work.
 
 ## Scope boundary
 
@@ -86,7 +86,7 @@ Angular's development proxy keeps browser API URLs relative. The Node API and it
 
 `app.config.ts` registers `provideHttpClient(withInterceptors([authInterceptor]))` and the actual route configuration. Keeping these providers in integration tests matters: testing a service alone would not catch an application that forgot to register its interceptor or protected routes.
 
-`App` hosts a router outlet. `/login` loads the login page through `guestGuard`; the authenticated parent uses `authGuard` and `authChildGuard` and lazily loads `WorkspaceShell`. Its children are `/overview` and `/applications`. The root still defaults to overview. The shell displays the authenticated name and role, closes dialogs/navigation on sign out, and updates its breadcrumb after router navigation. A direct applications visit returns there after authentication.
+`App` hosts a router outlet. `/login` loads the login page through `guestGuard`; the authenticated parent uses `authGuard` and `authChildGuard` and lazily loads `WorkspaceShell`. Its children include `/overview`, `/applications`, and the new/edit wizard routes described below. The root still defaults to overview. The shell displays the authenticated name and role, consults any draft leave safeguard before explicit sign out, closes dialogs/navigation after confirmation, and updates its breadcrumb after router navigation. A direct applications visit returns there after authentication.
 
 `AuthService` stores the session in memory using signals. The HTTP interceptor only attaches credentials to the trusted relative API, coordinates one refresh for concurrent 401s, handles late failures with the current token, and retries once. Session revisions stop old login/refresh responses from restoring a logged-out user or replacing a newer session. Reloading the browser loses the local session. See [authentication](AUTHENTICATION.md) for the lifecycle and tradeoffs.
 
@@ -94,4 +94,16 @@ Angular's development proxy keeps browser API URLs relative. The Node API and it
 
 A changed query cancels the previous read immediately, including while the next search is debouncing. Errors are caught inside the request flow, preserving later filters and retries. Explicit loading, success, and error states drive the template; success also handles empty results and an out-of-range page. The store is destroyed with the page, and filters are not persisted or synchronized to URL query parameters. See [dashboard behavior](DASHBOARD.md).
 
-The dashboard renders summaries only. It has no creation button or detail link until those workflows exist. The mock already supports these future operations, but their API availability is not a claim that the frontend implements them. Current verification results belong in [the progress log](PROGRESS.md).
+The dashboard renders summaries and now offers New application to SALES and Edit draft for an own DRAFT. It does not offer administrator assignment, reviewer decisions, or general detail links yet. Current verification results belong in [the progress log](PROGRESS.md).
+
+## Checkpoint 6: merchant drafts and submission
+
+`/applications/new` and `/applications/:id/edit` lazily load `ApplicationWizard` behind the appropriate shared permission guard. The new route presents a start screen; an explicit Create draft action sends the POST and opens its returned edit URL. Loaded records are checked with `canEditApplication` before editing, while the API independently enforces role, owner, and DRAFT state.
+
+The five-step flow is Business, Contact, Banking, Processing, and Review. `merchant-form.ts` creates four typed nested groups and keeps submission validity separate from whether a partial draft can be sent. Numeric controls can be null while editing; snapshots map those blanks to zero for the draft API. Submission requires positive finite amounts and `averageTicket ≤ maxTicket ≤ monthlyVolume`.
+
+`restoreMerchantForm` resets public values as a pristine baseline and leaves account/tax inputs blank. Stored presence metadata satisfies an unchanged blank secret; dirty blanks represent explicit clearing and cannot satisfy submission. `draftSnapshot` includes only dirty sensitive controls. The parent restores only on initial load or explicit reload, so a save response cannot overwrite edits made while that request was pending.
+
+A component-scoped `DraftAutosave` keeps one PATCH in flight and coalesces subsequent edits into one latest snapshot. Each write uses the last acknowledged version. A lost response is treated as unconfirmed; even an undo needs reconciliation. A 409 pauses writes and retains the local form until the user chooses to discard edits and load the server copy. Save now bypasses debounce, and submit waits for the latest acknowledgement before its own versioned POST. The form is disabled while saving for submission and submitting.
+
+Router deactivation and the shell's explicit sign-out use the same leave check. Unsaved work offers Stay, Save and leave when available, or Leave without saving. Saving conflicts require explicit resolution; leaving during submission is blocked. A beforeunload handler requests the browser's native warning, but does not synchronously save. Destroying the page cancels local subscriptions; it cannot roll back a write already accepted by the server. There is no browser-persisted draft mirror, so reload requires login and can restore only server-confirmed data. See [the wizard guide](WIZARD.md).

@@ -4,14 +4,19 @@
     <h1>Applications</h1>
     <p class="introduction">Find merchant applications and follow their review progress.</p>
   </div>
-  <button
-    mat-stroked-button
-    type="button"
-    [disabled]="store.state().kind === 'loading'"
-    (click)="store.reload()"
-  >
-    Reload
-  </button>
+  <div class="page-actions">
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="store.state().kind === 'loading'"
+      (click)="store.reload()"
+    >
+      Reload
+    </button>
+    @if (canCreate()) {
+      <a mat-flat-button routerLink="/applications/new">New application</a>
+    }
+  </div>
 </header>
 
 <p class="scope-note"><app-icon name="shield" /> {{ scopeDescription() }}</p>
@@ -131,6 +136,9 @@
                 <th scope="col">Created by</th>
                 <th scope="col">Assigned reviewer</th>
                 <th scope="col">Updated</th>
+                @if (canCreate()) {
+                  <th scope="col">Actions</th>
+                }
               </tr>
             </thead>
             <tbody>
@@ -143,9 +151,9 @@
                     <span class="application-id">{{ application.id }}</span>
                   </th>
                   <td>
-                    <span class="status-badge" [attr.data-status]="application.status">
-                      {{ statusLabels[application.status] }}
-                    </span>
+                    <span class="status-badge" [attr.data-status]="application.status">{{
+                      statusLabels[application.status]
+                    }}</span>
                   </td>
                   <td>{{ application.createdByName }}</td>
                   <td [class.unassigned]="!application.assignedReviewerName">
@@ -156,6 +164,20 @@
                       application.updatedAt | date: 'mediumDate'
                     }}</time>
                   </td>
+                  @if (canCreate()) {
+                    <td>
+                      @if (canEdit(application)) {
+                        <a
+                          class="edit-link"
+                          [routerLink]="['/applications', application.id, 'edit']"
+                          [attr.aria-label]="
+                            'Edit draft for ' + (application.legalName || 'untitled application')
+                          "
+                          >Edit draft</a
+                        >
+                      }
+                    </td>
+                  }
                 </tr>
               }
             </tbody>
@@ -196,6 +218,16 @@
                     </dd>
                   </div>
                 </dl>
+                @if (canEdit(application)) {
+                  <a
+                    class="edit-link card-action"
+                    [routerLink]="['/applications', application.id, 'edit']"
+                    [attr.aria-label]="
+                      'Edit draft for ' + (application.legalName || 'untitled application')
+                    "
+                    >Edit draft</a
+                  >
+                }
               </article>
             }
           </div>

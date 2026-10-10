@@ -1,8 +1,8 @@
-# Application dashboard: checkpoint 5
+# Application dashboard: checkpoints 5 and 6
 
 The protected `/applications` page lists the current user's permitted merchant applications. It supports server pagination, merchant-name search, status filtering, and loading, empty, failure, and retry states. Desktop uses a semantic table; narrow screens show the same summaries as labelled cards.
 
-Creation, editing, application detail, and review actions belong to later checkpoints. This list does not display banking fields or offer placeholder action buttons.
+SALES can now choose New application or Edit draft for an owned DRAFT. The list still contains summaries only and never displays banking fields. General application detail and administrator/reviewer actions belong to later checkpoints; there are no placeholder action links.
 
 ## Follow one interaction
 
@@ -23,7 +23,7 @@ RxJS handles the sequence of requests. Cancellation happens before the search de
 
 `catchError` is inside each request's inner stream. It converts one failure to an error state while keeping the outer stream available for retry and later filters. `takeUntilDestroyed` cancels outstanding work when the page and its component-scoped store are destroyed.
 
-This cancellation policy is appropriate for reads. It is not an autosave policy: unsubscribing cannot undo a write already accepted by the server. Checkpoint 6 will need serialized, versioned writes.
+This cancellation policy applies to reads. The checkpoint 6 wizard uses serialized, versioned writes instead: it retains one latest pending snapshot and waits for an in-flight save before starting another. Unsubscribing cannot undo a write already accepted by the server. See [the wizard guide](WIZARD.md).
 
 ## Permissions and navigation
 
@@ -31,7 +31,9 @@ This cancellation policy is appropriate for reads. It is not an autosave policy:
 - REVIEWER sees assigned applications (9 for each seeded Reviewer account).
 - ADMIN sees all 30 seeded applications.
 
-These totals come from the mock API and may change with future mutations. The role description is explanatory text, not client-side authorization. No owner or reviewer parameter is supplied by the UI to define its own scope.
+These totals describe the initial seed and change as SALES creates applications or records move through the workflow. The role description is explanatory text, not client-side authorization. No owner or reviewer parameter is supplied by the UI to define its own scope.
+
+New application opens `/applications/new`, where Create draft performs the actual POST. Edit draft opens `/applications/:id/edit` only for an owned DRAFT, using the shared `canEditApplication` rule. Both routes also have permission guards, and the API enforces ownership and status on every write. Submitted or terminal records do not offer an edit action. The list refreshes from the server when revisited after the wizard.
 
 The actual application configuration registers `HttpClient` with the auth interceptor. Guards protect the shell and its children; `/applications` is also an allowed login return destination. Integration tests use the real `appConfig` to catch missing providers or route wiring.
 
@@ -53,6 +55,6 @@ The actual application configuration registers `HttpClient` with the auth interc
 - [`applications.api.ts`](../src/app/features/applications/applications.api.ts): HTTP boundary.
 - [`application-list.ts`](../src/app/features/applications/application-list.ts): view state and status labels.
 - Store tests exercise server query parameters, page conversion/reset, debounce, cancellation, retry recovery, clearing, and cleanup.
-- Component tests use the real store with Angular's HTTP testing backend; root tests additionally exercise the real providers, login, protected route, bearer request, and logout.
+- Component tests use the real store with Angular's HTTP testing backend; root tests additionally exercise the real providers, login, protected route, bearer request, and logout. Role-aware action tests check New/Edit visibility; the wizard has its own form, autosave, submission, and leave checks.
 
 Executed checks and their results are recorded in [Progress](PROGRESS.md). The [learning log](LEARNING_LOG.md) contains an exercise to trace this flow. Reference: [Angular HTTP requests and cancellation](https://angular.dev/guide/http/making-requests).

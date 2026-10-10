@@ -12,7 +12,8 @@ export function safeReturnUrl(value: string | null): string {
     const url = new URL(value, 'https://merchant.invalid');
     if (
       url.origin === 'https://merchant.invalid' &&
-      ['/overview', '/applications'].includes(url.pathname)
+      (['/overview', '/applications', '/applications/new'].includes(url.pathname) ||
+        /^\/applications\/app-[a-z\d-]+\/edit$/.test(url.pathname))
     ) {
       return `${url.pathname}${url.search}${url.hash}`;
     }

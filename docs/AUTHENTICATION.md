@@ -1,6 +1,6 @@
-# Authentication: checkpoints 4 and 5
+# Authentication and guarded workflows
 
-Checkpoint 4 implements login, logout, route protection, session state, and refresh coordination. The application now registers that wiring at the root, and checkpoint 5 uses it for protected dashboard list requests. The overview remains informational; `/applications` fetches live mock data and can trigger refresh when its access token expires. See [dashboard behavior](DASHBOARD.md).
+Checkpoint 4 implements login, logout, route protection, session state, and refresh coordination. The application now registers that wiring at the root, and checkpoint 5 uses it for protected dashboard list requests. The overview remains informational; `/applications` fetches live mock data and can trigger refresh when its access token expires. Checkpoint 6 uses the same authentication for draft loading, creation, autosave, and submission. See [dashboard behavior](DASHBOARD.md) and [the wizard guide](WIZARD.md).
 
 ## Responsibilities
 
@@ -39,7 +39,7 @@ The retry has its own error handling. A retried `403`, `409`, `422`, or server e
 
 A session revision changes on login attempts and session clearing, but not on token rotation. Asynchronous responses carry the revision they started with. A response from an older session cannot restore its user, expire a newer login, or replay its request with the new user's credentials.
 
-Logout clears local access immediately and navigates to login. The shell first closes dialogs and mobile navigation. Server revocation is a separate best-effort request with a five-second timeout; failure does not undo local logout. If an old login or refresh later returns tokens, the service attempts to revoke those tokens without restoring that session.
+Explicit sign out in the shell first consults the active draft's leave safeguard. If the user stays or a requested save fails, sign out does not proceed. Once leaving is allowed, the shell closes dialogs/mobile navigation and logout clears local access immediately before navigating to login. Authentication expiry still clears invalid access; it does not preserve unsaved form values in browser storage. Server revocation is a separate best-effort request with a five-second timeout; failure does not undo local logout. If an old login or refresh later returns tokens, the service attempts to revoke those tokens without restoring that session.
 
 Tokens are not written to `localStorage`, `sessionStorage`, or URLs. Reloading the browser requires another login. This is an explicit demo tradeoff, not persistent-session support. See [security notes](SECURITY.md) for the mock's limits.
 
@@ -47,12 +47,12 @@ Tokens are not written to `localStorage`, `sessionStorage`, or URLs. Reloading t
 
 `authGuard` protects the lazy workspace parent; `authChildGuard` checks child navigation. `guestGuard` keeps an already signed-in user out of the login screen. Both overview and Applications are available to every authenticated role. The API scopes the records each role receives. The root defaults to overview after sign-in; Applications is available from the sidebar or a protected deep link.
 
-`permissionGuard(permission)` is ready for future restricted features using the shared role permissions. It does not replace ownership, reviewer assignment, status, or version checks at the API. The Applications route requires authentication; its record scope is enforced by the API. The wizard and review routes remain future work.
+`permissionGuard(permission)` protects `/applications/new` with `application:create` and `/applications/:id/edit` with `application:edit`, limiting both to SALES under the shared permissions. The wizard additionally checks the loaded record with `canEditApplication`. These checks guide the UI; ownership, status, and version checks are independently enforced by the API. Administrator/reviewer action routes remain future work. Wizard route deactivation and explicit sign out share a pending-change confirmation through `PendingChanges`.
 
-[`safeReturnUrl`](../src/app/core/auth/auth-navigation.ts) currently permits the normalized `/overview` and `/applications` paths, preserving the accepted path's query and fragment. The dashboard does not yet synchronize its filters with those query parameters. External, unknown, malformed, and login destinations fall back to `/overview`. Extend this allowlist when real feature routes are introduced.
+[`safeReturnUrl`](../src/app/core/auth/auth-navigation.ts) currently permits normalized `/overview`, `/applications`, `/applications/new`, and `/applications/app-[a-z\d-]+/edit` paths, preserving the accepted path's query and fragment. The dashboard does not yet synchronize its filters with those query parameters. External, unknown, malformed, and login destinations fall back to `/overview`. Extend this allowlist when real feature routes are introduced.
 
 ## Verification and learning
 
-The written HTTP tests cover concurrent and late `401` responses, subsequent refresh cycles, refresh failure, one retry, business-error separation, logout during refresh, and old responses after a new login. Guard tests cover anonymous access, role permission checks, guest navigation, and safe return destinations. Component tests cover the login form, authenticated shell, and dashboard. Root integration tests use the actual application providers and real authentication service to check form login, the guarded dashboard request with a bearer header, active navigation, and logout removing private content. Test outcomes are recorded in [the progress log](PROGRESS.md) after execution.
+The written HTTP tests cover concurrent and late `401` responses, subsequent refresh cycles, refresh failure, one retry, business-error separation, logout during refresh, and old responses after a new login. Guard tests cover anonymous access, role permission checks, guest navigation, and safe return destinations. Component tests cover the login form, authenticated shell, dashboard, and wizard integration. Wizard tests also cover pending-change navigation and explicit sign out. Root integration tests use the actual application providers and real authentication service to check form login, the guarded dashboard request with a bearer header, active navigation, and logout removing private content. Test outcomes are recorded in [the progress log](PROGRESS.md) after execution.
 
 Run `npm run test:ci` for Angular tests. To understand the key distinction, read the test where refresh succeeds but the retried request returns `500`: credentials are valid, while the requested operation failed. Signing the user out would hide that real problem.

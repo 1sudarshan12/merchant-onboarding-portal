@@ -186,6 +186,43 @@ Rendering a loading state can also destroy focused controls. Review caught this 
 
 **Learner exercise status:** Not yet recorded. Test results demonstrate the implementation; you should still run and explain these interactions yourself.
 
+## Checkpoint 6 — Typed wizard and reliable autosave
+
+**Implemented:** Five wizard steps, typed nested Reactive Forms, field and cross-field validators, explicit draft creation, restoration, automatic saving, review/submit, and leave/sign-out safeguards. Read [the wizard guide](WIZARD.md) for the design and its limits.
+
+### Validation has two different jobs
+
+Submission asks whether the application is complete and consistent. Saving a draft asks whether the server can safely store the current partial data. An incomplete email can be saved while still blocking Continue. A non-finite or negative processing amount cannot be sent under this API contract, so its local edit remains unsaved until corrected.
+
+The four nested form groups match the domain sections. Processing has a group validator because comparing average, maximum, and monthly amounts requires multiple controls. Numeric controls allow null when cleared; account numbers remain strings to preserve leading zeros.
+
+### Follow two overlapping edits
+
+Suppose version 1 contains name A. You type B, and a save starts with version 1. Before it returns, you type C. The screen continues showing C; it never patches itself back to B from the older response. When B succeeds with version 2, the next due save sends C with version 2. Only after that response does the indicator say all changes are saved.
+
+This uses a single active request and one latest pending snapshot. RxJS debounces the edit events; the coordinator serializes the writes. Unlike cancelling dashboard reads, cancelling a write cannot undo a server commit.
+
+### A failure is not always a rejection
+
+If a save returns a deliberate 503 before mutation, retry can use the same version. If the network loses the response, we may not know whether it committed. Retrying with the last acknowledged version lets the server detect that uncertainty as a conflict. The UI keeps local edits and asks for an explicit decision before loading the server copy.
+
+Submission first waits for the final save and then uses its returned version. “Clicked Save” and “server confirmed Saved” are different events. That distinction prevents submitting older data.
+
+### Keep masks out of form values
+
+A restored account field is blank, with a separate saved-value hint. An untouched field is omitted from saves. A replacement is sent as a string; editing and clearing explicitly clears the saved value. The review screen masks the replacement too. The server checks stored values at submission because the browser cannot validate a hidden number from a mask.
+
+### Try it yourself
+
+1. Sign in as Sales, select New application, and create a draft. Enter only a legal name; observe Unsaved → Saving → Saved despite other required fields being incomplete.
+2. Click Continue. Identify the missing field errors, and locate their validators in `merchant-form.ts`.
+3. Open the seeded `app-001` draft. Visit Banking and verify that inputs are blank while saved masks appear below them. Change only the bank name; inspect the snapshot test that proves account/tax values are omitted.
+4. Run the autosave test for overlapping edits. Explain which version each PATCH uses and why a response never replaces newer input.
+5. With unsaved changes, navigate away and choose Stay here. Explain why a failed Save and leave must also keep the form open.
+6. Explain the lost-response test: why can returning to the old value still require a server request?
+
+**Learner exercise status:** Not yet recorded. Review the code and try these steps before treating the implementation as something you can explain in an interview.
+
 ## Next checkpoint
 
-Checkpoint 6 builds the application wizard, form validation, masked draft restoration, and reliable autosave. We will serialize versioned writes and keep local edits available after failures or conflicts.
+Checkpoint 7 adds the application detail page, risk history, administrator assignment, reviewer decisions, and controlled sensitive-field reveal.

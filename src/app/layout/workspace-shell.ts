@@ -7,11 +7,15 @@ import { MatSidenavModule } from '@angular/material/sidenav';
 import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { filter, map } from 'rxjs';
 import { AuthService } from '../core/auth/auth.service';
+import { PendingChanges } from '../core/auth/pending-changes';
 import { ApplicationChecklist } from '../features/workspace/application-checklist';
 import { Icon } from '../shared/ui/icon';
 
 function workspacePageTitle(url: string): string {
-  return url.split(/[?#]/)[0] === '/applications' ? 'Applications' : 'Overview';
+  const path = url.split(/[?#]/)[0];
+  if (path === '/applications/new') return 'New application';
+  if (path.startsWith('/applications/')) return 'Edit draft';
+  return path === '/applications' ? 'Applications' : 'Overview';
 }
 
 @Component({
@@ -25,6 +29,7 @@ export class WorkspaceShell {
   protected readonly auth = inject(AuthService);
   private readonly dialog = inject(MatDialog);
   private readonly router = inject(Router);
+  private readonly pendingChanges = inject(PendingChanges);
   protected readonly currentPage = toSignal(
     this.router.events.pipe(
       filter((event): event is NavigationEnd => event instanceof NavigationEnd),
@@ -40,7 +45,8 @@ export class WorkspaceShell {
   );
   protected readonly navigationOpen = signal(false);
 
-  protected signOut(): void {
+  protected async signOut(): Promise<void> {
+    if (!(await this.pendingChanges.confirmLeaving())) return;
     this.dialog.closeAll();
     this.closeNavigation();
     this.auth.logout();

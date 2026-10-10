@@ -1,0 +1,239 @@
+:host {
+  display: block;
+}
+.back-link {
+  display: inline-block;
+  margin-bottom: 24px;
+  color: var(--color-accent);
+  font-size: 0.8125rem;
+  text-decoration: none;
+}
+.page-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 32px;
+}
+.eyebrow {
+  margin: 0 0 12px;
+  color: var(--color-muted);
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.13em;
+}
+h1 {
+  margin: 0;
+  font-size: clamp(1.75rem, 3vw, 2.125rem);
+  letter-spacing: -0.035em;
+}
+.intro,
+.helper,
+.privacy-note {
+  color: var(--color-muted);
+  font-size: 0.8125rem;
+  line-height: 1.7;
+}
+.intro {
+  margin: 8px 0 0;
+}
+.start-panel,
+.wizard-panel {
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  background: var(--color-surface);
+  padding: 32px;
+}
+.start-panel {
+  max-width: 720px;
+  h2 {
+    margin: 0 0 16px;
+  }
+  p {
+    line-height: 1.7;
+  }
+}
+.preparation-list {
+  padding-left: 24px;
+  line-height: 2;
+  color: var(--color-muted);
+}
+.save-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--color-accent);
+  font-size: 0.8125rem;
+  white-space: nowrap;
+  &[data-state='error'],
+  &[data-state='conflict'] {
+    color: #a1392d;
+  }
+}
+.status-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+}
+.step-navigation {
+  margin-bottom: 24px;
+  ol {
+    list-style: none;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding: 0;
+    margin: 0;
+  }
+  li {
+    flex: 1;
+  }
+  button {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    width: 100%;
+    border: 1px solid var(--color-border);
+    border-radius: 8px;
+    background: var(--color-surface);
+    color: var(--color-muted);
+    cursor: pointer;
+    font-size: 0.8125rem;
+  }
+  button[aria-current] {
+    color: var(--color-accent);
+    border-color: var(--color-accent);
+    background: var(--color-accent-soft);
+    font-weight: 600;
+  }
+}
+.step-number {
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  background: var(--color-subtle);
+  font-size: 0.75rem;
+  flex-shrink: 0;
+}
+.section-heading {
+  margin-bottom: 32px;
+  h2 {
+    margin: 0 0 12px;
+    font-size: 1.375rem;
+  }
+  p:last-child {
+    color: var(--color-muted);
+    font-size: 0.8125rem;
+    line-height: 1.7;
+  }
+}
+.notice {
+  border: 1px solid #e7bcb7;
+  border-radius: 8px;
+  padding: 16px;
+  margin-bottom: 24px;
+  background: #fff7f5;
+  font-size: 0.875rem;
+  line-height: 1.7;
+  p {
+    margin: 0 0 8px;
+  }
+}
+.error-message,
+.validation-notice {
+  color: #92372c;
+}
+.validation-notice {
+  margin-bottom: 24px;
+  font-size: 0.875rem;
+}
+.wizard-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--color-border);
+  > div {
+    display: flex;
+    gap: 8px;
+  }
+}
+.review-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+.review-section {
+  min-width: 0;
+  padding: 20px;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+.review-heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  h3 {
+    margin: 0;
+    font-size: 1rem;
+  }
+}
+dl {
+  display: grid;
+  gap: 14px;
+  margin: 16px 0 0;
+  font-size: 0.8125rem;
+  dt {
+    color: var(--color-muted);
+    margin-bottom: 4px;
+  }
+  dd {
+    margin: 0;
+    overflow-wrap: anywhere;
+    line-height: 1.6;
+  }
+}
+.submission-note {
+  color: var(--color-muted);
+  margin-top: 24px;
+  font-size: 0.875rem;
+  line-height: 1.7;
+}
+.privacy-note {
+  margin-top: 20px;
+}
+@media (max-width: 799px) {
+  .page-heading {
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 16px;
+  }
+  .review-grid {
+    grid-template-columns: 1fr;
+  }
+  .step-navigation li {
+    flex: 1 0 28%;
+  }
+}
+@media (max-width: 599px) {
+  .start-panel,
+  .wizard-panel {
+    padding: 20px 16px;
+  }
+  .wizard-actions {
+    flex-wrap: wrap;
+    > div {
+      margin-left: auto;
+    }
+  }
+  .step-navigation button {
+    gap: 6px;
+    padding: 10px 6px;
+    font-size: 0.75rem;
+  }
+}

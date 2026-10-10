@@ -66,7 +66,7 @@ Implemented typed login with demo-role selection, in-memory session signals, aut
 
 The checkout at the start of Checkpoint 5 contained these auth files but still used the earlier root shell/configuration. Checkpoint 5 reconnects the actual providers and protected routes. Integration tests now use `appConfig` directly and verify login → bearer-authenticated dashboard → logout, so isolated feature tests cannot conceal missing application wiring.
 
-Current verification includes all auth HTTP/guard/login tests in the 47-test Angular suite recorded below. Memory-only sessions intentionally require sign-in after a browser reload. No persistent-session behavior is claimed.
+Checkpoint 5 verification included all auth HTTP/guard/login tests in the 47-test Angular suite recorded below. Memory-only sessions intentionally require sign-in after a browser reload. No persistent-session behavior is claimed.
 
 ## Checkpoint 5: Application dashboard
 
@@ -91,9 +91,31 @@ The mock/API contracts did not change in this checkpoint; their earlier 25-test 
 
 Candidate exercises and independent code review remain unrecorded. These are bounded workflow and keyboard checks, not a full accessibility audit.
 
+## Checkpoint 6: Merchant wizard, drafts, and autosave
+
+Implemented the five-step Business, Contact, Banking, Processing, and Review wizard with 19 typed fields, field validation, and processing-amount relationships. SALES can create a draft and reopen an owned DRAFT through the dashboard's role-aware New application/Edit draft actions. The actual root routes use role permission guards, and loaded records and API writes independently check edit permissions.
+
+Draft restoration fills public values while keeping account/tax replacement inputs blank and displaying stored masks separately. Unchanged sensitive fields are omitted from writes; an edited blank preserves explicit clearing intent. Autosave marks edits unsaved immediately, debounces for 700 ms, serializes versioned PATCH requests, and retains one latest pending snapshot. Failed saves preserve inputs and support explicit retry; 409 conflicts pause writes until an explicit discard-and-load-server-copy decision. Submission flushes and awaits the final save before posting the acknowledged version. Navigation and explicit sign out share the pending-draft guard. See [Wizard](WIZARD.md).
+
+Verification on 10 October 2026:
+
+- `npm run test:ci`: 78 Angular tests passed across nine files.
+- `npm run build`: passed without warnings; initial bundle 303.12 kB and lazy wizard chunk 74.89 kB. Existing bundle/style budgets are unchanged.
+- Live restored-draft flow: opened seeded `app-001`, retained edited values through an injected save 503, chose Stay here when attempting to leave, and retried successfully after the temporary three-second access token expired. The saved merchant name was restored on return.
+- Live banking/review flow: stored masks appeared beside blank replacement inputs; the review step and submission completed, the confirmation received focus, and the submitted dashboard row no longer offered Edit draft.
+- Live new-draft flow: created a draft and saved incomplete Business values while required errors blocked Continue. Completed all five steps. An average ticket of 500 with a maximum of 100 blocked Continue with a visible cross-field error; correcting the maximum to 1000 allowed the masked review, showing only the expected account/tax endings.
+- Live final-flush check: changed monthly volume from 10000 to 12000 and chose Continue and Submit before the autosave debounce elapsed. The UI showed Saving and submitting with actions disabled, then confirmed successful submission with focus on the Application submitted heading.
+- Responsive review: the inspected wizard fit at 375px without horizontal overflow. The 1440px desktop review screenshot also showed no horizontal overflow. Final captured browser warning/error logs were empty.
+- Conflict recovery was exercised through TestBed, not a live browser conflict scenario.
+- Corrections during verification: fixed touched-field error rendering under OnPush; preserved server validators across step mounts; retained server errors until their own section changes; and prevented values outside draft wire bounds from being falsely labelled saved.
+- `npm run format:check` and `git diff --check` passed.
+
+After save-failure and refresh checks, the API was restarted with its normal demo settings and the preview was signed out. Restarting resets the fictional records. The API and Angular preview on port 4201 remain running for the learner. No API contract or mock-server changes were made; the earlier 25-test API result remains historical and was not rerun for this checkpoint.
+
+The `feat/application-wizard` branch initially lacked the existing checkpoint 5 work. It was fast-forwarded to the user's existing commit `16bca90` before implementation. No new commit or push was performed. Candidate review and learner exercises remain unrecorded. The recorded browser flows and tests are bounded verification, not a full accessibility audit.
+
 ## Future checkpoints
 
-6. Build the application wizard, validation, masked draft restoration, and reliable autosave.
 7. Add application detail, assigned reviews, admin assignments, and controlled sensitive-field reveal.
 8. Complete accessibility and responsive checks, security documentation, meaningful regression tests, and submission preparation.
 

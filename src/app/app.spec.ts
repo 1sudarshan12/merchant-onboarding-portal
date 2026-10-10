@@ -5,7 +5,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { NavigationEnd, Router } from '@angular/router';
 import { filter, firstValueFrom } from 'rxjs';
 import { afterEach, describe, expect, it } from 'vitest';
-import type { ApplicationSummary, LoginResponse, Page } from '../../shared/models';
+import type { ApplicationSummary, LoginResponse, Page, Role } from '../../shared/models';
 import { App } from './app';
 import { appConfig } from './app.config';
 import { AuthService } from './core/auth/auth.service';
@@ -57,13 +57,13 @@ async function createApplication() {
 
 type ApplicationContext = Awaited<ReturnType<typeof createApplication>>;
 
-async function signIn(context: ApplicationContext): Promise<void> {
+async function signIn(context: ApplicationContext, role: Role = 'SALES'): Promise<void> {
   const signedIn = firstValueFrom(
     context.auth.login({ email: SESSION.user.email, password: 'Demo#1234' }),
   );
   const request = context.controller.expectOne('/api/auth/login');
   expect(request.request.headers.has('Authorization')).toBe(false);
-  request.flush(SESSION);
+  request.flush({ ...SESSION, user: { ...SESSION.user, role } });
   await signedIn;
 }
 
@@ -182,6 +182,7 @@ describe('Application integration', () => {
     );
     expect(signOut?.type).toBe('button');
     signOut!.click();
+    await Promise.resolve();
     expect(auth.isAuthenticated()).toBe(false);
     const logout = controller.expectOne('/api/auth/logout');
     expect(logout.request.body).toEqual({ refreshToken: SESSION.refreshToken });
@@ -194,4 +195,35 @@ describe('Application integration', () => {
     expect(page.textContent).not.toContain('Integration Merchant');
     expect(page.querySelector('.session-identity')).toBeNull();
   });
+
+  it('preserves a draft edit destination through anonymous navigation and allows Sales creation', async () => {
+    const context = await createApplication();
+    await context.router.navigateByUrl('/applications/app-001/edit');
+    expect(context.router.parseUrl(context.router.url).queryParams['returnUrl']).toBe(
+      '/applications/app-001/edit',
+    );
+    context.controller.expectNone('/api/applications/app-001');
+    await signIn(context);
+    await context.router.navigateByUrl('/applications/new');
+    await context.fixture.whenStable();
+    expect(
+      (context.fixture.nativeElement as HTMLElement).querySelector('h1')?.textContent,
+    ).toContain('New application');
+    // Visiting the route is read-only; the user explicitly creates a draft with its button.
+    context.controller.expectNone((request) => request.method === 'POST');
+  });
+
+  it.each(['ADMIN', 'REVIEWER'] as const)(
+    'blocks %s from both wizard routes before fetching a draft',
+    async (role) => {
+      const context = await createApplication();
+      await signIn(context, role);
+      for (const url of ['/applications/new', '/applications/app-001/edit']) {
+        await context.router.navigateByUrl(url);
+        await context.fixture.whenStable();
+        expect(context.router.url).toBe('/overview');
+        context.controller.expectNone((request) => request.url.startsWith('/api/applications'));
+      }
+    },
+  );
 });

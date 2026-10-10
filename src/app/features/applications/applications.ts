@@ -7,6 +7,9 @@ import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { MatPaginatorModule } from '@angular/material/paginator';
 import { MatSelectModule } from '@angular/material/select';
+import { RouterLink } from '@angular/router';
+import type { ApplicationSummary } from '../../../../shared/models';
+import { canEditApplication } from '../../../../shared/permissions';
 import { AuthService } from '../../core/auth/auth.service';
 import { Icon } from '../../shared/ui/icon';
 import { STATUS_LABELS, STATUS_OPTIONS } from './application-list';
@@ -22,6 +25,7 @@ import { ApplicationsStore } from './applications.store';
     MatInputModule,
     MatPaginatorModule,
     MatSelectModule,
+    RouterLink,
     Icon,
   ],
   providers: [ApplicationsStore],
@@ -35,6 +39,7 @@ export class Applications {
   protected readonly search = new FormControl(this.store.query().search, { nonNullable: true });
   protected readonly statusOptions = STATUS_OPTIONS;
   protected readonly statusLabels = STATUS_LABELS;
+  protected readonly canCreate = computed(() => this.auth.user()?.role === 'SALES');
   protected readonly hasFilters = computed(
     () => this.store.query().search.trim().length > 0 || this.store.query().status !== '',
   );
@@ -55,6 +60,11 @@ export class Applications {
     this.search.valueChanges.pipe(takeUntilDestroyed()).subscribe((value) => {
       this.store.setSearch(value);
     });
+  }
+
+  protected canEdit(application: ApplicationSummary): boolean {
+    const user = this.auth.user();
+    return user !== null && canEditApplication(user, application);
   }
 
   protected clearSearch(input: HTMLInputElement): void {

@@ -1,6 +1,6 @@
 # Mock API contract
 
-Checkpoint 3 implements this contract in Express. Checkpoints 4 and 5 connect Angular login, refresh/logout, and the application dashboard to it. Draft creation/editing and review endpoints remain ready for later frontend screens. This is a local development server with fictional data, not a production backend. All applications and sessions reset when it restarts.
+Checkpoint 3 implements this contract in Express. Checkpoints 4 and 5 connect Angular login, refresh/logout, and the application dashboard to it. Checkpoint 6 connects draft creation, loading, saving, and submission. Assignment, review decisions, and sensitive reveal endpoints remain ready for later frontend screens. This is a local development server with fictional data, not a production backend. All applications and sessions reset when it restarts.
 
 ## Start and configure
 
@@ -17,7 +17,7 @@ No environment file is required. Copy `.env.example` to `.env` only to change th
 | `MOCK_FAIL_LIST_ONCE`      | `0`     | `1` makes the first valid authenticated list request fail with 503.            |
 | `MOCK_FAIL_SAVE_ONCE`      | `0`     | `1` makes the first otherwise valid draft PATCH fail with 503 before mutation. |
 
-Fault flags reset on server restart. Invalid configuration stops startup with a descriptive error. Latency, token expiry, and list failures support the current loading, retry, and refresh demonstrations. The save failure flag is available for the future autosave screen.
+Fault flags reset on server restart. Invalid configuration stops startup with a descriptive error. Latency, token expiry, and list failures support the current loading, retry, and refresh demonstrations. The save failure flag exercises the wizard's retained edits and Retry saving action. See [the wizard guide](WIZARD.md).
 
 ## Fictional accounts and records
 
@@ -94,7 +94,7 @@ Account numbers and tax IDs are strings to preserve leading zeros. These field f
 
 Draft patches can be incomplete. Only known sections and fields are accepted. Strings are trimmed and limited to 500 characters; processing amounts must be finite numbers between 0 and 1 trillion; the international flag must be boolean. Empty strings can clear a saved value. Unknown fields, wrong types, and sensitive values containing masking characters are rejected with 400.
 
-Submission validates the entire saved form: legal name at least two characters; registration 6–20 letters/digits/hyphens; selected business type and industry; required contact/address fields; email format; phone 7–15 digits with optional spaces and leading `+`; bank name; account number 8–17 digits; tax ID nine digits. All processing amounts must be positive, with `averageTicket ≤ maxTicket ≤ monthlyVolume`. An optional website must be HTTP(S). Invalid submissions return 422 with dotted field paths for future form error mapping.
+Submission validates the entire saved form: legal name at least two characters; registration 6–20 letters/digits/hyphens; selected business type and industry; required contact/address fields; email format; phone 7–15 digits with optional spaces and leading `+`; bank name; account number 8–17 digits; tax ID nine digits. All processing amounts must be positive, with `averageTicket ≤ maxTicket ≤ monthlyVolume`. An optional website must be HTTP(S). Invalid submissions return 422 with dotted field paths; the wizard maps these to controls and opens the first affected section.
 
 For example, this changes one field without touching the rest:
 
@@ -122,7 +122,13 @@ Default detail and mutation responses omit `form.banking.accountNumber` and `for
 
 An unset value has `present: false` and `masked: ""`. Stored values of four characters or fewer are completely masked, since incomplete drafts are allowed. List responses contain summary fields only. All responses use `Cache-Control: no-store`.
 
-The future form must keep this display metadata separate from editable input values. Omit unchanged sensitive fields from a patch; send raw replacement values only when the user changes them. A mask is never a value to restore into a form control and save. The server validates actual stored values at submission, so restoring a draft does not require SALES to reveal those values.
+The implemented wizard keeps display metadata separate from blank editable sensitive controls. It omits unchanged sensitive fields and sends raw replacements only from dirty controls. A dirty blank sends an empty string, expressing an explicit clear. A pristine blank can satisfy frontend submission validation when the metadata says a stored value is present. The server still validates actual stored values at submission, so restoring a draft does not require SALES to reveal those values. Masks never become editable values or write payloads.
+
+## Wizard write ordering
+
+The client debounces ordinary edits for 700 ms, keeps at most one PATCH in flight, and retains only the latest pending snapshot while that write finishes. It uses each successful response's version for the next write. Save now flushes the debounce; submission first awaits the latest save, then posts the acknowledged version to `/submit`. Incomplete fields may be saved within wire bounds even when the form is not ready to submit.
+
+A failed or lost response does not establish whether the server committed a request. Retry uses the last acknowledged version, allowing the API to report a conflict instead of silently overwriting newer data. On 409, the client keeps local inputs and pauses saving; replacing them requires the user's explicit discard-and-reload choice. Unsubscribing on page destruction cannot undo an accepted PATCH or POST. The frontend does not persist its own draft copy across browser reloads.
 
 ## Errors
 

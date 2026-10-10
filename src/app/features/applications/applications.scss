@@ -4,11 +4,17 @@
 
 .page-heading,
 .results-heading,
-.card-heading {
+.card-heading,
+.page-actions {
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: var(--space-4);
+}
+
+.page-heading,
+.page-actions {
+  flex-wrap: wrap;
 }
 
 .eyebrow {
@@ -43,10 +49,16 @@ h1 {
   gap: var(--space-2);
   margin: var(--space-6) 0;
   font-size: 0.8125rem;
+}
 
-  app-icon {
-    color: var(--color-accent);
-  }
+.scope-note app-icon,
+.edit-link {
+  color: var(--color-accent);
+}
+
+.edit-link {
+  font-weight: 600;
+  text-underline-offset: 0.2em;
 }
 
 .applications-panel {
@@ -110,14 +122,13 @@ thead {
 
 th,
 td {
-  padding: var(--space-4);
+  padding: var(--space-4) var(--space-3);
   overflow-wrap: anywhere;
   line-height: 1.6;
-  vertical-align: middle;
 }
 
 th:first-child {
-  width: 28%;
+  width: 25%;
   padding-left: var(--space-6);
 }
 
@@ -125,14 +136,9 @@ tbody tr {
   border-bottom: 1px solid var(--color-border);
 }
 
-tbody th {
-  font-weight: 500;
-}
-
 .merchant-name {
   display: block;
   margin: 0;
-  color: var(--color-ink);
   font-size: 0.875rem;
   font-weight: 600;
   overflow-wrap: anywhere;
@@ -159,7 +165,6 @@ tbody th {
   font-size: 0.6875rem;
   font-weight: 600;
   line-height: 1.5;
-  white-space: nowrap;
 
   &[data-status='SUBMITTED'] {
     background: #eaf1ff;
@@ -189,7 +194,6 @@ tbody th {
   h2 {
     margin: var(--space-4) 0 var(--space-2);
     font-size: 1.125rem;
-    font-weight: 600;
   }
 
   p {
@@ -214,7 +218,6 @@ tbody th {
 .loading-state {
   padding: var(--space-6);
   color: var(--color-muted);
-  font-size: 0.875rem;
 }
 
 .skeleton-lines > div {
@@ -222,7 +225,6 @@ tbody th {
   grid-template-columns: 2fr 1fr 1fr;
   gap: var(--space-6);
   padding-block: var(--space-6);
-  border-bottom: 1px solid var(--color-border);
 
   span {
     height: 0.875rem;
@@ -248,7 +250,7 @@ mat-paginator {
   white-space: nowrap;
 }
 
-@media (max-width: 799px) {
+@media (max-width: 899px) {
   .desktop-table {
     display: none;
   }
@@ -264,6 +266,12 @@ mat-paginator {
 
   .card-heading {
     align-items: flex-start;
+  }
+
+  .card-action {
+    display: inline-block;
+    margin-top: var(--space-4);
+    font-size: 0.8125rem;
   }
 
   dl {
@@ -291,10 +299,6 @@ mat-paginator {
 }
 
 @media (max-width: 599px) {
-  .page-heading {
-    align-items: flex-start;
-  }
-
   .filters,
   .results-heading,
   .application-card {

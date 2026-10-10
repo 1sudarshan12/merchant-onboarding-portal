@@ -2,11 +2,11 @@
 
 The portal should help users find an application, understand its state, and complete the next permitted action. Visual polish should support those tasks: clear hierarchy, readable forms, predictable controls, and useful feedback.
 
-## Current scope through checkpoint 5
+## Current scope through checkpoint 6
 
-Checkpoint 2 established the responsive shell, lazy workspace overview, and Material preparation-checklist dialog. Checkpoint 4 adds the sign-in form, real authenticated identity, protected shell, and sign out. Checkpoint 5 adds `/applications`: a server-backed list with search, status filtering, pagination, and useful result states.
+Checkpoint 2 established the responsive shell, lazy workspace overview, and Material preparation-checklist dialog. Checkpoint 4 adds the sign-in form, real authenticated identity, protected shell, and sign out. Checkpoint 5 adds `/applications`: a server-backed list with search, status filtering, pagination, and useful result states. Checkpoint 6 adds New application and own-draft editing for SALES, with a five-step form and submission.
 
-The default authenticated destination remains `/overview`, and Applications has its own navigation link. The shell's breadcrumb follows the route. The overview and checklist explain the workflow; they do not create records. The merchant wizard and detail/review screens remain future work, so list rows are not presented as links to unavailable pages.
+The default authenticated destination remains `/overview`, and Applications has its own navigation link. The shell's breadcrumb follows the route. The overview and checklist explain the workflow; they do not create records. The list now offers real New application and Edit draft actions where permitted. General application detail and administrator/reviewer screens remain future work; merchant names are not placeholder links.
 
 Do not display an invented signed-in role, fabricated counts, or buttons that suggest unavailable actions work. Add feature navigation and actions when their destinations and behavior exist.
 
@@ -54,12 +54,22 @@ Keep the type hierarchy small: one page heading, section headings, readable body
 ## Layout and component responsibilities
 
 - **Shell:** `WorkspaceShell` is the authenticated application frame: navigation, brand, skip link, and the outlet for route content. A sidebar can remain visible on wide screens and become compact or collapsible on narrow screens. If collapsed, its toggle must work with the keyboard, expose its expanded state, and preserve sensible focus behavior.
-- **Route page:** The content for a particular URL, including its page heading and the actions relevant to that task. The overview introduces the workflow; Applications provides the working list. Future forms should focus on their task rather than repeating introductory cards.
+- **Route page:** The content for a particular URL, including its page heading and the actions relevant to that task. The overview introduces the workflow; Applications provides the working list; the wizard focuses on one merchant form section at a time.
 - **Reusable UI:** A component with a clear repeated purpose, such as a status indicator or an error panel. Extract one when actual reuse warrants it. A checklist dialog is a focused interaction and does not need its own route.
 
 The dashboard places search and status filters above a table on wide screens and merchant cards on narrow screens. Both presentations show the same returned page: merchant name/ID, status, creator, reviewer, and update date. Text labels accompany status colors. Totals are actual filtered server totals, not fabricated metrics.
 
 Loading replaces old results with an announced loading state. Errors provide a Try again action. Empty states distinguish no accessible applications, no filter matches, and a page that has become empty; the last offers a return to the first page. Reload keeps the current query. Material's paginator offers 10, 25, or 50 rows per page. See [dashboard behavior](DASHBOARD.md) for state and request details.
+
+## Wizard interaction
+
+The steps are Business, Contact, Banking, Processing, and Review. A new route first asks the user to Create draft, making the server mutation explicit. Existing own drafts open their saved values directly. Forward navigation validates earlier sections; Back preserves edits. The final summary offers section editing and masks account/tax values.
+
+Save feedback distinguishes unsaved, saving, saved, failure, and conflict. Incomplete drafts may save, while submission has stricter validation. Failed saves preserve inputs and expose Retry saving. A conflict pauses saving and offers Load server copy only through an explicit discard confirmation. Do not imply that closing a page cancels a server write.
+
+Stored account/tax values are shown as masked metadata beside blank replacement inputs. Empty pristine inputs retain their saved values; an edited blank means the user intends to clear them. This makes restoration possible without revealing raw stored values to SALES.
+
+Pending changes on navigation or explicit sign out offer Stay, Save and leave when possible, or Leave without saving. The dialog explains that a write already sent may still finish. During submission the form and step actions are disabled. Field errors and step notices provide text feedback; the active step heading receives focus when the step changes. Verification outcomes are recorded separately in [Progress](PROGRESS.md). See [the wizard guide](WIZARD.md) for state and persistence details.
 
 ## Accessibility rules and checks
 
@@ -85,7 +95,9 @@ Implemented source structure:
 - `src/app/app.routes.ts`: public login and guarded lazy workspace/Applications routes.
 - `src/app/layout/workspace-shell.*`: responsive Material sidenav, identity, sign out, and route breadcrumb.
 - `src/app/features/auth/login.*`: typed sign-in form and demo-account controls.
-- `src/app/features/applications/`: list page, query/result state, and HTTP list access.
+- `src/app/features/applications/`: list page, query/result state, HTTP list access, and permitted draft links.
+- `src/app/features/application-wizard/`: step flow, typed form and fields, serialized autosave, draft API, and leave dialog.
+- `src/app/core/auth/pending-changes.ts`: connects explicit sign out with the active draft leave check.
 - `src/app/features/workspace/workspace.ts`, `.html`, `.scss`: workspace overview page.
 - `src/app/features/workspace/application-checklist.ts`, `.html`, `.scss`: preparation checklist dialog.
 - `public/application-illustration.svg`: decorative local artwork with empty alternative text in the page. It contains no application data.

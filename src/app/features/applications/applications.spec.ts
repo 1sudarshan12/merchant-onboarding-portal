@@ -3,6 +3,7 @@ import { provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { signal } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import type { ApplicationSummary, Page, Role, User } from '../../../../shared/models';
 import { AuthService } from '../../core/auth/auth.service';
@@ -49,6 +50,7 @@ async function renderApplications(role: Role = 'SALES') {
     providers: [
       provideHttpClient(),
       provideHttpClientTesting(),
+      provideRouter([]),
       { provide: AuthService, useValue: { user: signal<User | null>(user) } },
     ],
   }).compileComponents();
@@ -272,15 +274,42 @@ describe('Applications dashboard', () => {
     ['REVIEWER', 'Showing applications assigned to you.'],
     ['ADMIN', 'Showing applications across the team.'],
   ] as const)(
-    'explains the %s view while leaving record scoping to the API',
+    'explains the %s view and exposes only permitted creation and draft-edit links',
     async (role, description) => {
       const { fixture, page, pending } = await renderApplications(role);
       const request = pending();
       expect(request.request.params.keys().sort()).toEqual(['page', 'pageSize']);
-      request.flush(result([], 0));
+      request.flush(
+        result(
+          [
+            ...merchants,
+            {
+              ...merchants[0],
+              id: 'app-other-owner',
+              legalName: 'Another owner’s draft',
+              createdBy: 'sales-2',
+            },
+          ],
+          3,
+        ),
+      );
       fixture.detectChanges();
       expect(page.querySelector('.scope-note')?.textContent).toContain(description);
       expect(page.querySelector('[aria-label="Filter applications by status"]')).not.toBeNull();
+      const create = page.querySelector<HTMLAnchorElement>('a[href="/applications/new"]');
+      const editLinks = page.querySelectorAll<HTMLAnchorElement>('a[aria-label^="Edit draft for"]');
+      if (role === 'SALES') {
+        expect(create?.textContent).toContain('New application');
+        // The permitted draft has one desktop link and one mobile link.
+        expect(editLinks).toHaveLength(2);
+        for (const link of editLinks) {
+          expect(link.getAttribute('href')).toBe('/applications/app-001/edit');
+          expect(link.getAttribute('aria-label')).toBe('Edit draft for Fictional Alpine Goods');
+        }
+      } else {
+        expect(create).toBeNull();
+        expect(editLinks).toHaveLength(0);
+      }
     },
   );
 });

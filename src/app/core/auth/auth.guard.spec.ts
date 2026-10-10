@@ -106,6 +106,9 @@ describe('authentication route guards', () => {
       '/overview?status=DRAFT#applications',
       '/applications',
       '/applications?status=SUBMITTED&page=2#results',
+      '/applications/new',
+      '/applications/app-001/edit',
+      '/applications/app-123e4567-e89b-12d3-a456-426614174000/edit?step=2',
     ]) {
       expect(safeReturnUrl(url)).toBe(url);
     }
@@ -121,7 +124,9 @@ describe('authentication route guards', () => {
       '/overview-extra',
       '/applications-extra',
       '/applications/../login',
-      '/applications/new',
+      '/applications/app-001/review',
+      '/applications/app-001/edit/extra',
+      '/applications/app-001%2F..%2Flogin/edit',
       '/overview\\evil',
     ]) {
       expect(safeReturnUrl(url)).toBe('/overview');
