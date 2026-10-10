@@ -1,6 +1,6 @@
 # Merchant Portal
 
-An Angular merchant onboarding application being built in guided checkpoints. The current UI includes a responsive shell, lazy workspace overview, shared Material/SCSS theme, and preparation checklist. Checkpoint 3 adds shared application types and a tested mock API for authentication, role permissions, drafts, and reviews. The frontend login and business pages will connect to this API in later checkpoints.
+An Angular merchant onboarding application being built in guided checkpoints. The current UI includes sign-in, a protected responsive workspace, and an application dashboard with server pagination, merchant search, status filters, and loading, empty, error, and retry states. The mock API enforces roles and supports drafts and reviews; the creation wizard and application detail/review screens remain future checkpoints.
 
 ## Run locally
 
@@ -11,9 +11,9 @@ npm ci
 npm run dev
 ```
 
-Open <http://localhost:4200>; the router redirects to `/overview`. The command runs Angular on port 4200 and the mock API on `127.0.0.1:3000`. Stop any earlier `npm start` process first to free port 4200. Angular proxies `/api/**` to the API; restart Angular after a proxy change. `npm run dev` stops both child processes if either exits.
+Open <http://localhost:4200>. An anonymous visitor reaches `/login`; choose a demo account and sign in. The default destination is `/overview`; choose **Applications** in the sidebar to open `/applications`. A direct visit to `/applications` returns there after login. The command runs Angular on port 4200 and the mock API on `127.0.0.1:3000`. Stop any earlier `npm start` process first to free port 4200. Angular proxies `/api/**` to the API; restart Angular after a proxy change. `npm run dev` stops both child processes if either exits.
 
-No environment variables are required. The optional `.env.example` documents latency, token expiry, and one-time error settings; copy it to `.env` to change them. All data is fictional and resets when the API restarts. The frontend does not yet show a login form.
+No environment variables are required. The optional `.env.example` documents latency, token expiry, and one-time error settings; copy it to `.env` to change them. All data is fictional and resets when the API restarts. Frontend sessions are held only in memory, so reloading the browser requires another login. API records remain until the API restarts.
 
 Demo accounts: `sales1@example.test`, `sales2@example.test`, `reviewer1@example.test`, `reviewer2@example.test`, and `admin@example.test`. All use the public demo password `Demo#1234`. See the [API contract](docs/API.md) for login requests, endpoint details, permissions, and sample records.
 
@@ -35,25 +35,31 @@ Demo accounts: `sales1@example.test`, `sales2@example.test`, `reviewer1@example.
 ## Read the code
 
 - `src/main.ts` starts the standalone Angular application.
-- `src/app/app.config.ts` registers application providers, including the router.
-- `src/app/app.routes.ts` registers the lazy `/overview` route and the root redirect.
-- `src/app/app.ts`, `app.html`, and `app.scss` define the responsive shell and navigation.
+- `src/app/app.config.ts` registers the router and `HttpClient` with the authentication interceptor.
+- `src/app/app.routes.ts` defines public login and guarded lazy workspace routes.
+- `src/app/app.ts`, `app.html`, and `app.scss` provide the root router outlet.
+- `src/app/layout/workspace-shell.*` defines authenticated navigation, the current identity, dynamic breadcrumbs, and sign out.
+- `src/app/core/auth/` contains session state, the bearer/refresh interceptor, guards, and safe return navigation.
+- `src/app/features/auth/` contains the typed login form.
+- `src/app/features/applications/` contains the dashboard, its page-scoped store, and list API service.
 - `src/app/features/workspace/` contains the overview page and preparation checklist dialog.
 - `src/styles/_tokens.scss` defines shared colors, spacing, radii, and typography.
 - `public/application-illustration.svg` is a decorative local illustration; it represents no merchant record.
 - `src/styles.scss` defines the Material theme and global styles. Fonts are local system fonts, so building does not need a font download.
-- `src/app/app.spec.ts` checks real route rendering and the checklist open/close interaction with TestBed.
+- `src/app/app.spec.ts` uses the actual application providers, real authentication service, and an HTTP test backend to check login, guarded navigation, bearer headers, dashboard rendering, the checklist, and logout.
 - `shared/models.ts` defines API request/response types; `shared/permissions.ts` defines reusable role and record permission predicates.
 - `mock-api/server.ts` starts the server; `app.ts` defines HTTP behavior; `auth.ts` manages expiring sessions.
 - `mock-api/validation.ts` validates incoming data at runtime; `responses.ts` constructs safe public responses; `seed.ts` supplies fictional records.
 - `mock-api/app.spec.ts` exercises the API over HTTP; `shared/permissions.spec.ts` checks permission rules.
 
-The current tests cover the shell/dialog plus server-side authentication, permissions, pagination, masking, validation, version conflicts, workflow transitions, and retryable failures. Frontend concurrent refresh, form interactions, and autosave still need implementation and tests.
+Tests are written for frontend authentication and concurrent refresh, real application wiring, dashboard request cancellation and retry, and server-side permissions, pagination, masking, validation, version conflicts, and workflow transitions. See the progress log for executed checks and results. Merchant wizard, autosave, and detail/review interactions remain to be implemented.
 
 ## Documentation maintained with each checkpoint
 
 - [Design guide](docs/DESIGN.md): visual rules, design tokens, responsive behavior, and accessibility.
 - [Architecture](docs/ARCHITECTURE.md): decisions, assumptions, and responsibilities.
+- [Authentication](docs/AUTHENTICATION.md): session state, guarded navigation, shared refresh, and logout races.
+- [Dashboard](docs/DASHBOARD.md): server-driven queries, request cancellation, and result states.
 - [API contract](docs/API.md): setup, demo accounts, requests, responses, validation, and errors.
 - [Security notes](docs/SECURITY.md): implemented controls, mock limitations, and remaining frontend/deployment work.
 - [Learning log](docs/LEARNING_LOG.md): explanations and small exercises.

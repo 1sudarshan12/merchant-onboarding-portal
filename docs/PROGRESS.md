@@ -60,10 +60,39 @@ The initial API test attempt hit sandbox restrictions on local listening; the sa
 
 This completes the backend implementation portion of Checkpoint 3. Frontend login, refresh coordination, guards, dashboard, autosave, and review pages are still future work. Candidate review and learner exercises remain unrecorded.
 
+## Checkpoint 4: Frontend authentication
+
+Implemented typed login with demo-role selection, in-memory session signals, authenticated navigation and logout, route guards, a trusted-API bearer interceptor, coordinated refresh, and bounded retries. Session revisions protect against late responses after logout or a new login. See [Authentication](AUTHENTICATION.md).
+
+The checkout at the start of Checkpoint 5 contained these auth files but still used the earlier root shell/configuration. Checkpoint 5 reconnects the actual providers and protected routes. Integration tests now use `appConfig` directly and verify login → bearer-authenticated dashboard → logout, so isolated feature tests cannot conceal missing application wiring.
+
+Current verification includes all auth HTTP/guard/login tests in the 47-test Angular suite recorded below. Memory-only sessions intentionally require sign-in after a browser reload. No persistent-session behavior is claimed.
+
+## Checkpoint 5: Application dashboard
+
+Implemented the lazy protected `/applications` route, authenticated navigation, a typed HTTP service, component-scoped signal/RxJS store, server pagination, 300 ms merchant-name search, status filtering, and loading/empty/error/retry states. Search/status/page-size changes reset pagination. The server remains responsible for role scope and totals. Desktop uses a semantic table; phones use labelled cards.
+
+Added [dashboard implementation notes](DASHBOARD.md), learning exercises, and updates to setup, architecture, API, authentication, design, security, and AI-assistance records. Creation, editing, detail, and review controls remain future work.
+
+Verification on 10 October 2026:
+
+- `npm run test:ci`: 47 tests passed across six files, including eight store scenarios, nine dashboard component scenarios, and five tests using the real root configuration.
+- `npm run build`: passed without warnings; initial bundle 301.75 kB, lazy applications chunk 89.36 kB. Existing bundle/style budgets are unchanged.
+- Live Sales flow: direct `/applications` redirects through login and returns to the dashboard; 15 records appear as ten plus five; Draft resets to page one with three matching records; page size 25 returns all 15; unmatched search shows its recovery state.
+- Live role checks: Reviewer saw nine records, each assigned to that reviewer; Admin saw a 30-record total with both Sales creators. Mobile navigation opened the Applications route successfully.
+- Mobile at 375px: cards and paginator fit without horizontal overflow. Keyboard Next retains focus even at the last page; page-size selection retains its combobox focus; clearing an empty result returns focus to search.
+- Failure/refresh check: a temporary mock process with one injected list failure, three-second access tokens, and 300 ms latency showed the error state, then Retry recovered the list after token expiry without signing out. Retry focus remained on the results region.
+- Source review identified paginator destruction and disappearing clear-button focus. Both were fixed and covered by tests that render the pending state before flushing the HTTP response.
+- `npm run format:check` and `git diff --check` passed. No warnings or errors were captured in the final browser console check.
+
+After failure testing, the temporary fault/expiry overrides were removed by restarting the API with its normal settings. The Angular preview and API remain running for the learner.
+
+The mock/API contracts did not change in this checkpoint; their earlier 25-test API result remains historical. A dev-server restart was required after new lazy-route files were created during a running build. The preview uses port 4201 to preserve the existing process on 4200.
+
+Candidate exercises and independent code review remain unrecorded. These are bounded workflow and keyboard checks, not a full accessibility audit.
+
 ## Future checkpoints
 
-4. Implement frontend authentication, concurrent-401 refresh, and access control with focused tests.
-5. Build the responsive dashboard with server-side pagination, filtering, and error/retry behavior.
 6. Build the application wizard, validation, masked draft restoration, and reliable autosave.
 7. Add application detail, assigned reviews, admin assignments, and controlled sensitive-field reveal.
 8. Complete accessibility and responsive checks, security documentation, meaningful regression tests, and submission preparation.

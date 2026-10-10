@@ -100,8 +100,13 @@ describe('authentication route guards', () => {
     expect(router.serializeUrl(cannotCreate as UrlTree)).toBe('/overview');
   });
 
-  it('restricts return URLs to the implemented overview route and preserves its query and fragment', () => {
-    for (const url of ['/overview', '/overview?status=DRAFT#applications']) {
+  it('restricts return URLs to implemented workspace routes and preserves query and fragment', () => {
+    for (const url of [
+      '/overview',
+      '/overview?status=DRAFT#applications',
+      '/applications',
+      '/applications?status=SUBMITTED&page=2#results',
+    ]) {
       expect(safeReturnUrl(url)).toBe(url);
     }
     for (const url of [
@@ -114,6 +119,9 @@ describe('authentication route guards', () => {
       '/unknown',
       '/overview/../login',
       '/overview-extra',
+      '/applications-extra',
+      '/applications/../login',
+      '/applications/new',
       '/overview\\evil',
     ]) {
       expect(safeReturnUrl(url)).toBe('/overview');

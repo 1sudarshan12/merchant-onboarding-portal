@@ -44,3 +44,15 @@ Codex implemented the shared domain/API contracts, permission helpers, fictional
 Verification on 10 October 2026: 25 API/permission tests and two Angular TestBed tests passed, strict API type checking passed, and the production build passed without warnings. A live check through Angular's proxy verified health, login, scoped pagination, logout, and revoked-token rejection. Local network access required sandbox approval. The existing Angular process occupied port 4200, so the live check used a temporary server on 4201. A startup check found and corrected a misleading success log on a listen failure.
 
 The API tests do not demonstrate client-side concurrent refresh, forms, autosave, or role-aware pages; those are later checkpoints. Candidate review, explanation, and learner exercises remain unrecorded.
+
+## Checkpoints 4 and 5 assistance
+
+Codex assisted with the frontend authentication implementation described in [Authentication](AUTHENTICATION.md), then implemented the application dashboard: typed API access, component-scoped query/result signals, cancellable RxJS reads, server pagination, debounced search, status filtering, responsive presentation, and recovery states.
+
+At the start of Checkpoint 5, auth files were present while the root still used its earlier configuration. Codex reconnected the router, `HttpClient` interceptor, and authenticated shell and added integration tests using the real application providers. Subagents handled bounded root integration, dashboard UI, focused test, documentation, and review tasks. The root agent coordinated changes, implemented the data layer, and verified the integrated result.
+
+Review identified a keyboard regression: conditional result rendering destroyed the paginator during loading. The paginator now remains mounted; clear actions and retry move focus to persistent elements. Tests render the intermediate pending state to catch this class of problem instead of only checking the completed response.
+
+Verification: 47 Angular tests passed, and the production build passed without warnings or budget changes. Browser checks exercised scoped Sales pages, status filtering, page-size changes, filtered empty recovery, phone layout, pagination/clear/retry focus, and a simulated 503 followed by retry after access-token expiry. Full results and any additional role checks are recorded in [Progress](PROGRESS.md). No API contract or mock-server code changed in this checkpoint.
+
+Codex maintained implementation notes and learner exercises. Candidate review, understanding, authorship explanation, and exercise completion are not implied by passing tests and remain unrecorded. No commit, publication, reviewer invitation, or external communication was performed for this checkpoint.

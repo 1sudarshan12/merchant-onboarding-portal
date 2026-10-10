@@ -2,11 +2,11 @@
 
 The portal should help users find an application, understand its state, and complete the next permitted action. Visual polish should support those tasks: clear hierarchy, readable forms, predictable controls, and useful feedback.
 
-## Checkpoint 2 scope
+## Current scope through checkpoint 5
 
-Implemented: a responsive application shell, a lazy-loaded workspace overview, and a Material dialog containing a merchant preparation checklist. The overview remains an introductory workspace, not the future application dashboard.
+Checkpoint 2 established the responsive shell, lazy workspace overview, and Material preparation-checklist dialog. Checkpoint 4 adds the sign-in form, real authenticated identity, protected shell, and sign out. Checkpoint 5 adds `/applications`: a server-backed list with search, status filtering, pagination, and useful result states.
 
-The overview and checklist explain the workflow. They do not create an application. Authentication, API integration, server permissions, drafts, and reviews remain future work. A responsive layout or functioning dialog is evidence of UI behavior, not evidence that those business features work.
+The default authenticated destination remains `/overview`, and Applications has its own navigation link. The shell's breadcrumb follows the route. The overview and checklist explain the workflow; they do not create records. The merchant wizard and detail/review screens remain future work, so list rows are not presented as links to unavailable pages.
 
 Do not display an invented signed-in role, fabricated counts, or buttons that suggest unavailable actions work. Add feature navigation and actions when their destinations and behavior exist.
 
@@ -53,11 +53,13 @@ Keep the type hierarchy small: one page heading, section headings, readable body
 
 ## Layout and component responsibilities
 
-- **Shell:** The persistent application frame: navigation, brand, skip link, and the outlet for route content. A sidebar can remain visible on wide screens and become compact or collapsible on narrow screens. If collapsed, its toggle must work with the keyboard, expose its expanded state, and preserve sensible focus behavior.
-- **Route page:** The content for a particular URL, including its page heading and the actions relevant to that task. The workspace overview is the first page; later dashboard and form pages should focus on doing the work rather than repeating introductory cards.
+- **Shell:** `WorkspaceShell` is the authenticated application frame: navigation, brand, skip link, and the outlet for route content. A sidebar can remain visible on wide screens and become compact or collapsible on narrow screens. If collapsed, its toggle must work with the keyboard, expose its expanded state, and preserve sensible focus behavior.
+- **Route page:** The content for a particular URL, including its page heading and the actions relevant to that task. The overview introduces the workflow; Applications provides the working list. Future forms should focus on their task rather than repeating introductory cards.
 - **Reusable UI:** A component with a clear repeated purpose, such as a status indicator or an error panel. Extract one when actual reuse warrants it. A checklist dialog is a focused interaction and does not need its own route.
 
-For future data-heavy pages, make the main task and page state immediately visible. Design loading, empty, error, and success states alongside the populated screen. Avoid adding metrics merely to fill a dashboard.
+The dashboard places search and status filters above a table on wide screens and merchant cards on narrow screens. Both presentations show the same returned page: merchant name/ID, status, creator, reviewer, and update date. Text labels accompany status colors. Totals are actual filtered server totals, not fabricated metrics.
+
+Loading replaces old results with an announced loading state. Errors provide a Try again action. Empty states distinguish no accessible applications, no filter matches, and a page that has become empty; the last offers a return to the first page. Reload keeps the current query. Material's paginator offers 10, 25, or 50 rows per page. See [dashboard behavior](DASHBOARD.md) for state and request details.
 
 ## Accessibility rules and checks
 
@@ -78,8 +80,12 @@ Implemented source structure:
 
 - `src/styles/_tokens.scss`: semantic CSS custom properties emitted under `:root`.
 - `src/styles.scss`: token import, Material theme, and application-wide defaults.
-- `src/app/app.ts`, `src/app/app.html`, `src/app/app.scss`: shell and responsive Material sidenav.
-- `src/app/app.routes.ts`: route registration, including lazy loading for `/overview`.
+- `src/app/app.ts`, `src/app/app.html`, `src/app/app.scss`: root router outlet.
+- `src/app/app.config.ts`: real router and authenticated HTTP providers.
+- `src/app/app.routes.ts`: public login and guarded lazy workspace/Applications routes.
+- `src/app/layout/workspace-shell.*`: responsive Material sidenav, identity, sign out, and route breadcrumb.
+- `src/app/features/auth/login.*`: typed sign-in form and demo-account controls.
+- `src/app/features/applications/`: list page, query/result state, and HTTP list access.
 - `src/app/features/workspace/workspace.ts`, `.html`, `.scss`: workspace overview page.
 - `src/app/features/workspace/application-checklist.ts`, `.html`, `.scss`: preparation checklist dialog.
 - `public/application-illustration.svg`: decorative local artwork with empty alternative text in the page. It contains no application data.
@@ -87,6 +93,6 @@ Implemented source structure:
 
 Validation outcomes belong in `docs/PROGRESS.md`; learning notes belong in `docs/LEARNING_LOG.md`.
 
-## Verified behavior
+## Historical checkpoint 2 verification
 
-At desktop width, navigation stays visible; at 375px the drawer opens through a labelled menu button. Browser checks confirmed no horizontal overflow, Tab focus wrapping inside the checklist, Escape closing it and restoring opener focus, and nested drawer → checklist → drawer → menu-button focus restoration. The skip link focuses main content without leaving `/overview`. These checks cover the implemented UI; a full accessibility audit and data-heavy dashboard validation remain future work.
+At desktop width, navigation stays visible; at 375px the drawer opens through a labelled menu button. Browser checks confirmed no horizontal overflow, Tab focus wrapping inside the checklist, Escape closing it and restoring opener focus, and nested drawer → checklist → drawer → menu-button focus restoration. The skip link focuses main content without leaving `/overview`. These results describe the checkpoint 2 UI at that time. Current authentication/dashboard verification is recorded separately in [the progress log](PROGRESS.md); this historical note does not claim a complete accessibility audit.

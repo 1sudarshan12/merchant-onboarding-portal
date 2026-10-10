@@ -10,7 +10,10 @@ export function safeReturnUrl(value: string | null): string {
   }
   try {
     const url = new URL(value, 'https://merchant.invalid');
-    if (url.origin === 'https://merchant.invalid' && url.pathname === '/overview') {
+    if (
+      url.origin === 'https://merchant.invalid' &&
+      ['/overview', '/applications'].includes(url.pathname)
+    ) {
       return `${url.pathname}${url.search}${url.hash}`;
     }
   } catch {

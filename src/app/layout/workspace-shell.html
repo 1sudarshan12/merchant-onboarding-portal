@@ -33,6 +33,15 @@
       >
         <app-icon name="grid" /> Overview
       </a>
+      <a
+        class="nav-item"
+        routerLink="/applications"
+        routerLinkActive="nav-item--active"
+        ariaCurrentWhenActive="page"
+        (click)="closeNavigation()"
+      >
+        <app-icon name="document" /> Applications
+      </a>
       <button class="nav-item" type="button" (click)="openChecklist()">
         <app-icon name="checklist" /> Application checklist
       </button>
@@ -63,7 +72,7 @@
         }
         <span class="breadcrumb-parent">Workspace</span>
         <span class="breadcrumb-divider" aria-hidden="true">/</span>
-        <span class="breadcrumb-current">Overview</span>
+        <span class="breadcrumb-current">{{ currentPage() }}</span>
       </div>
       <div class="session-actions">
         @if (auth.user(); as user) {

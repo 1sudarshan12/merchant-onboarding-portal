@@ -4,11 +4,15 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { MatButtonModule } from '@angular/material/button';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSidenavModule } from '@angular/material/sidenav';
-import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
-import { map } from 'rxjs';
+import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { filter, map } from 'rxjs';
 import { AuthService } from '../core/auth/auth.service';
 import { ApplicationChecklist } from '../features/workspace/application-checklist';
 import { Icon } from '../shared/ui/icon';
+
+function workspacePageTitle(url: string): string {
+  return url.split(/[?#]/)[0] === '/applications' ? 'Applications' : 'Overview';
+}
 
 @Component({
   selector: 'app-workspace-shell',
@@ -20,6 +24,14 @@ import { Icon } from '../shared/ui/icon';
 export class WorkspaceShell {
   protected readonly auth = inject(AuthService);
   private readonly dialog = inject(MatDialog);
+  private readonly router = inject(Router);
+  protected readonly currentPage = toSignal(
+    this.router.events.pipe(
+      filter((event): event is NavigationEnd => event instanceof NavigationEnd),
+      map((event) => workspacePageTitle(event.urlAfterRedirects)),
+    ),
+    { initialValue: workspacePageTitle(this.router.url) },
+  );
   protected readonly isMobile = toSignal(
     inject(BreakpointObserver)
       .observe('(max-width: 959px)')

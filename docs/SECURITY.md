@@ -1,6 +1,6 @@
 # Security notes
 
-## Implemented in Checkpoint 3
+## Server controls implemented in checkpoint 3
 
 The mock API authenticates protected requests and enforces role, ownership, assignment, and workflow state on the server. List scope is applied before filtering, pagination, and totals. Draft patches use nested field allowlists, so client-supplied owner, status, role, and history fields cannot change internal records. Runtime validation complements TypeScript, whose types do not validate incoming JSON.
 
@@ -18,9 +18,17 @@ Optimistic versions prevent stale writes within the single server process. A rea
 
 The API returns 403 for an existing record outside the user's scope and 404 for an unknown record. This intentionally distinguishes those conditions in the demo. A production policy may choose uniform 404 responses to reduce record-existence disclosure.
 
-## Planned frontend protections
+## Frontend controls implemented in checkpoints 4 and 5
 
-Checkpoint 4 will add in-memory frontend session state, a bearer interceptor restricted to the trusted API, coordinated refresh for concurrent 401 responses, and route guards. Later checkpoints will add permission-aware controls and temporary sensitive-field reveal. None of these frontend protections are claimed implemented by the mock API tests.
+`app.config.ts` registers the bearer interceptor and guarded application routes. Public login sits outside the authenticated workspace shell. Frontend session state is memory-only; browser reload requires sign-in again. The interceptor attaches credentials only to normalized root-relative protected API URLs, coordinates one refresh for concurrent 401s, and retries once. Login, logout, refresh, and health requests are excluded from that handling. Session revisions prevent stale responses from restoring a previous user. Server logout is best effort after immediate local session clearing.
+
+Safe return navigation permits only `/overview` and `/applications`, with the accepted route's query and fragment preserved. Other destinations fall back to overview. This controls navigation; it does not make route parameters an authorization source.
+
+The dashboard receives only server-scoped summaries. It does not download a global dataset and hide unauthorized rows in the browser. Filtering and totals follow the server's role scope. Results and query state are scoped to each route visit, and pending list reads are cancelled when a newer query takes over or the page is destroyed. Banking values are absent from list responses. See [authentication](AUTHENTICATION.md) and [dashboard behavior](DASHBOARD.md).
+
+## Remaining frontend and deployment work
+
+Merchant creation, detail/review actions, and temporary sensitive-field reveal remain future screens. The reusable permission guard is available for those feature routes, but their record-level checks still belong to the API.
 
 Avoid placing tokens or raw sensitive values in URLs, logs, or browser persistence. Rendering should use Angular's normal escaped bindings, without bypassing sanitization. A production authentication design should choose its cookie/token storage strategy alongside the backend, including CSRF protections when cookie credentials are used.
 
@@ -28,4 +36,4 @@ The assignment's CSP requirement remains future deployment work. A CSP must be d
 
 ## Verification
 
-The HTTP tests cover login/expiry/rotation/logout, role and record scope, default masking and reveal restrictions, field allowlists, version conflicts, workflow transitions, and unchanged data after an injected failed save. The tests are evidence for these bounded behaviors, not a penetration test or a claim that production security is complete.
+The server HTTP tests cover login/expiry/rotation/logout, role and record scope, default masking and reveal restrictions, field allowlists, version conflicts, workflow transitions, and unchanged data after an injected failed save. Angular tests exercise concurrent refresh, session races, guarded navigation, and the real application provider configuration with a controlled HTTP backend. Dashboard tests exercise reads, cancellation, and error recovery. See [the progress log](PROGRESS.md) for executed results. These are bounded behavioral checks, not a penetration test or a claim that production security is complete.

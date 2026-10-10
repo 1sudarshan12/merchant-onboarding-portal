@@ -1,6 +1,6 @@
 # Mock API contract
 
-Checkpoint 3 implements this contract in Express. The Angular UI will connect to it in later checkpoints. This is a local development server with fictional data, not a production backend. All applications and sessions reset when it restarts.
+Checkpoint 3 implements this contract in Express. Checkpoints 4 and 5 connect Angular login, refresh/logout, and the application dashboard to it. Draft creation/editing and review endpoints remain ready for later frontend screens. This is a local development server with fictional data, not a production backend. All applications and sessions reset when it restarts.
 
 ## Start and configure
 
@@ -17,7 +17,7 @@ No environment file is required. Copy `.env.example` to `.env` only to change th
 | `MOCK_FAIL_LIST_ONCE`      | `0`     | `1` makes the first valid authenticated list request fail with 503.            |
 | `MOCK_FAIL_SAVE_ONCE`      | `0`     | `1` makes the first otherwise valid draft PATCH fail with 503 before mutation. |
 
-Fault flags reset on server restart. Invalid configuration stops startup with a descriptive error. These controls support later loading, retry, refresh, and autosave demonstrations.
+Fault flags reset on server restart. Invalid configuration stops startup with a descriptive error. Latency, token expiry, and list failures support the current loading, retry, and refresh demonstrations. The save failure flag is available for the future autosave screen.
 
 ## Fictional accounts and records
 
@@ -47,7 +47,7 @@ All routes use the `/api` prefix. Protected routes require `Authorization: Beare
 
 Tokens are opaque random values backed by in-memory sessions. Refresh invalidates both previous tokens immediately. An expired or invalid access token produces 401. The refresh token must still be valid; refreshing does not extend its original expiration. Independent logins have separate sessions. Logout takes the current refresh token and does not require a still-valid access token.
 
-The API supports testing refresh, but the Angular interceptor that shares one refresh across concurrent 401s is **Checkpoint 4**, not implemented here.
+The Angular authentication interceptor is registered through `app.config.ts`. It shares one refresh across concurrent 401s and retries protected requests once; dashboard list requests use it. Frontend sessions are memory-only, so browser reload requires login even if a server session has not yet expired. See [authentication](AUTHENTICATION.md).
 
 ## Access and workflow
 
@@ -75,7 +75,7 @@ Lifecycle: `DRAFT → SUBMITTED → IN_REVIEW → APPROVED / REJECTED`. Assignme
 | `GET /applications/:id/sensitive`  | —                                               | `{ accountNumber, taxId }`, only with reveal permission. |
 | `GET /reviewers`                   | —                                               | `User[]` of reviewers, ADMIN only.                       |
 
-List pages are **1-based**, default 1. Page size defaults to 10 and has a maximum of 50. The server applies role scope, exact status, and trimmed case-insensitive legal-name search before calculating `total` and paginating. Search is at most 100 characters. Results sort by `updatedAt` descending, then ID ascending. An out-of-range page returns an empty `items` array and the filtered total. The future Material paginator uses 0-based indices and must convert at the API boundary.
+List pages are **1-based**, default 1. Page size defaults to 10 and has a maximum of 50. The server applies role scope, exact status, and trimmed case-insensitive legal-name search before calculating `total` and paginating. Search is at most 100 characters. Results sort by `updatedAt` descending, then ID ascending. An out-of-range page returns an empty `items` array and the filtered total. The implemented Material paginator uses 0-based indices; the dashboard store converts those to the API's 1-based page numbers. Search is debounced by 300 ms, and filters reset the page to 1. See [dashboard behavior](DASHBOARD.md).
 
 Every existing-record mutation requires the version last read by the client. A successful mutation increments the version and updates `updatedAt`. A stale version returns 409 without changing data. Version checking and mutation are synchronous within this single-process mock. A production database would need an atomic conditional update/transaction.
 

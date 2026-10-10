@@ -140,6 +140,52 @@ The current tests use an injected clock for expiration, rather than waiting 30 s
 
 **Learner exercise status:** Not yet recorded. Review one endpoint and its test before moving on; these notes do not claim you have already completed the exercises.
 
+## Checkpoint 4 — Authentication
+
+**Implemented:** Typed login form, in-memory session signals, route guards, authenticated shell, bearer interceptor, one shared refresh for concurrent 401 responses, and logout. Read [Authentication](AUTHENTICATION.md) for the request lifecycle and the session-revision protection against late responses.
+
+Authentication identifies the user; authorization checks their permitted action. A route guard improves navigation, while the API remains responsible for role and record checks. A successful refresh followed by a failed business request must show that request's error rather than sign the user out.
+
+Tokens live in memory, so reloading the browser starts a new login. Leaving a page idle does not itself refresh credentials; the next protected request discovers expiry. TestBed HTTP tests exercise concurrent requests, late responses, refresh failure, and logout races.
+
+**Learner exercise:** Read the interceptor test where refresh succeeds but the retried request returns 500. Explain why the user stays signed in. Then locate the guard and the matching API permission check and describe their different responsibilities. Exercise completion is not yet recorded.
+
+## Checkpoint 5 — A dashboard backed by server queries
+
+**Implemented:** Protected Applications navigation; responsive table/cards; server pagination; debounced merchant search; status filtering; loading, empty, error, and retry states. [Dashboard](DASHBOARD.md) explains the files and implementation tradeoffs. The root configuration also reconnects the existing authentication files to the actual app; integration tests now use that configuration.
+
+### Signals hold a value; RxJS coordinates work
+
+`store.query()` answers “Which page and filters are selected now?” `store.state()` answers “Are results loading, available, or failed?” These are signals because the template needs their current values.
+
+Typing, changing a status, and clicking Next produce events over time. RxJS coordinates their HTTP requests. The outer `switchMap` cancels the previous read immediately; its inner timer waits 300 ms for search. If you type again, both a pending timer and an older HTTP subscription can be cancelled. This prevents an old response from appearing under newer filter controls.
+
+Search debouncing and stale-response cancellation solve different problems. Debouncing reduces unnecessary requests; cancellation ensures only the current request can update this screen. Cancelling a read is safe here. A future draft write may already have reached the server, so autosave will require a different strategy.
+
+### A server page is not the whole collection
+
+For Sales, the server may return 10 rows with a total of 15. Render those 10 rows and pass 15 to the paginator. Filtering just those 10 rows locally would miss matching merchants on the other page and show a misleading total.
+
+Material emits index 0 for the first page; the API expects page 1. `setPage` translates between them. Changing search, status, or page size returns to the first page so a previously valid page number does not hide a smaller result set.
+
+The server first scopes records to the user, then filters and counts them. A role label or hidden button cannot provide that protection. The frontend only explains why Sales, Reviewer, and Admin see different lists.
+
+### Keep the stream and keyboard interaction alive
+
+`catchError` belongs inside the individual request. If an error ended the outer event stream, clicking Retry or changing a filter would no longer trigger work. A regression test fails one query, retries it, then changes the status to verify continued operation.
+
+Rendering a loading state can also destroy focused controls. Review caught this with the paginator: removing it while loading sent keyboard focus away. It now stays mounted. Clear buttons deliberately focus the search input before disappearing; Retry focuses the persistent results region. Test and inspect the transition itself, not just the final successful screen.
+
+### Try it yourself
+
+1. Sign in with the Sales demo and open **Applications**. Find the 15-record total and the 10 rows on page one; click Next and observe the remaining five.
+2. Select Draft. Explain why the page resets and why only three seeded records match. Search for `21`, then a nonexistent merchant name; use Clear filters to recover.
+3. Trace search from `applications.ts` through `applications.store.ts` to `applications.api.ts`. Identify which file knows about controls, cancellation, and HTTP parameters respectively.
+4. Read the cancellation test. Explain why it checks that the old request was cancelled before advancing the 300 ms timer.
+5. Explain what would go wrong if we copied this read-cancellation approach directly into autosave.
+
+**Learner exercise status:** Not yet recorded. Test results demonstrate the implementation; you should still run and explain these interactions yourself.
+
 ## Next checkpoint
 
-Checkpoint 4 connects Angular to authentication: login UI, session state, the bearer/refresh interceptor, and route access control. We will specifically test that simultaneous 401 responses share one refresh request and that a failed retry does not accidentally clear a valid session.
+Checkpoint 6 builds the application wizard, form validation, masked draft restoration, and reliable autosave. We will serialize versioned writes and keep local edits available after failures or conflicts.
