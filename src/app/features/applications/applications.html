@@ -1,0 +1,248 @@
+<header class="page-heading">
+  <div>
+    <p class="eyebrow">WORKSPACE</p>
+    <h1>Applications</h1>
+    <p class="introduction">Find merchant applications and follow their review progress.</p>
+  </div>
+  <div class="page-actions">
+    <button
+      mat-stroked-button
+      type="button"
+      [disabled]="store.state().kind === 'loading'"
+      (click)="store.reload()"
+    >
+      Reload
+    </button>
+    @if (canCreate()) {
+      <a mat-flat-button routerLink="/applications/new">New application</a>
+    }
+  </div>
+</header>
+
+<p class="scope-note"><app-icon name="shield" /> {{ scopeDescription() }}</p>
+
+<div class="applications-panel">
+  <section class="filters" aria-label="Application filters">
+    <mat-form-field class="search-field" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Search merchants</mat-label>
+      <input
+        #searchInput
+        matInput
+        type="search"
+        [formControl]="search"
+        maxlength="100"
+        autocomplete="off"
+      />
+      @if (search.value) {
+        <button
+          mat-icon-button
+          matSuffix
+          type="button"
+          aria-label="Clear search"
+          (click)="clearSearch(searchInput)"
+        >
+          <app-icon name="close" />
+        </button>
+      }
+    </mat-form-field>
+
+    <mat-form-field class="status-field" appearance="outline" subscriptSizing="dynamic">
+      <mat-label>Status</mat-label>
+      <mat-select
+        aria-label="Filter applications by status"
+        [value]="store.query().status"
+        (selectionChange)="store.setStatus($event.value)"
+      >
+        <mat-option value="">All statuses</mat-option>
+        @for (option of statusOptions; track option.value) {
+          <mat-option [value]="option.value">{{ option.label }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (hasFilters()) {
+      <button mat-button type="button" (click)="clearFilters(searchInput)">Clear filters</button>
+    }
+  </section>
+
+  <section
+    #resultsRegion
+    tabindex="-1"
+    aria-label="Application results"
+    [attr.aria-busy]="store.state().kind === 'loading'"
+  >
+    @let state = store.state();
+    @switch (state.kind) {
+      @case ('loading') {
+        <div class="loading-state" role="status">
+          <p>Loading applications…</p>
+          <div class="skeleton-lines" aria-hidden="true">
+            @for (row of [1, 2, 3, 4, 5]; track row) {
+              <div><span></span><span></span><span></span></div>
+            }
+          </div>
+        </div>
+      }
+      @case ('error') {
+        <div class="empty-state error-state" role="alert">
+          <span class="state-icon"><app-icon name="document" /></span>
+          <h2>Applications couldn’t load</h2>
+          <p>{{ state.message }}</p>
+          <button mat-flat-button type="button" (click)="retry(resultsRegion)">Try again</button>
+        </div>
+      }
+      @case ('success') {
+        <div class="results-heading">
+          <h2>Application list</h2>
+          <p role="status">
+            {{ state.page.total }} {{ state.page.total === 1 ? 'application' : 'applications' }}
+            @if (hasFilters()) {
+              <span>matching your filters</span>
+            }
+          </p>
+        </div>
+
+        @if (state.page.items.length === 0) {
+          <div class="empty-state">
+            <span class="state-icon"><app-icon name="document" /></span>
+            @if (state.page.total > 0) {
+              <h2>No applications on this page</h2>
+              <p>
+                The list has changed. Return to the first page to see the available applications.
+              </p>
+              <button mat-stroked-button type="button" (click)="firstPage(resultsRegion)">
+                Return to first page
+              </button>
+            } @else if (hasFilters()) {
+              <h2>No matching applications</h2>
+              <p>Try a different merchant name or status.</p>
+              <button mat-stroked-button type="button" (click)="clearFilters(searchInput)">
+                Clear filters
+              </button>
+            } @else {
+              <h2>No applications yet</h2>
+              <p>The merchant applications you can access will appear here.</p>
+            }
+          </div>
+        } @else {
+          <table class="desktop-table">
+            <caption class="sr-only">
+              Merchant applications
+            </caption>
+            <thead>
+              <tr>
+                <th scope="col">Merchant</th>
+                <th scope="col">Status</th>
+                <th scope="col">Created by</th>
+                <th scope="col">Assigned reviewer</th>
+                <th scope="col">Updated</th>
+                @if (canCreate()) {
+                  <th scope="col">Actions</th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (application of state.page.items; track application.id) {
+                <tr>
+                  <th scope="row">
+                    <span class="merchant-name">{{
+                      application.legalName || 'Untitled application'
+                    }}</span>
+                    <span class="application-id">{{ application.id }}</span>
+                  </th>
+                  <td>
+                    <span class="status-badge" [attr.data-status]="application.status">{{
+                      statusLabels[application.status]
+                    }}</span>
+                  </td>
+                  <td>{{ application.createdByName }}</td>
+                  <td [class.unassigned]="!application.assignedReviewerName">
+                    {{ application.assignedReviewerName || 'Unassigned' }}
+                  </td>
+                  <td>
+                    <time [attr.datetime]="application.updatedAt">{{
+                      application.updatedAt | date: 'mediumDate'
+                    }}</time>
+                  </td>
+                  @if (canCreate()) {
+                    <td>
+                      @if (canEdit(application)) {
+                        <a
+                          class="edit-link"
+                          [routerLink]="['/applications', application.id, 'edit']"
+                          [attr.aria-label]="
+                            'Edit draft for ' + (application.legalName || 'untitled application')
+                          "
+                          >Edit draft</a
+                        >
+                      }
+                    </td>
+                  }
+                </tr>
+              }
+            </tbody>
+          </table>
+
+          <div class="mobile-cards">
+            @for (application of state.page.items; track application.id) {
+              <article
+                class="application-card"
+                [attr.aria-labelledby]="'merchant-' + application.id"
+              >
+                <div class="card-heading">
+                  <div>
+                    <h3 class="merchant-name" [id]="'merchant-' + application.id">
+                      {{ application.legalName || 'Untitled application' }}
+                    </h3>
+                    <span class="application-id">{{ application.id }}</span>
+                  </div>
+                  <span class="status-badge" [attr.data-status]="application.status">{{
+                    statusLabels[application.status]
+                  }}</span>
+                </div>
+                <dl>
+                  <div>
+                    <dt>Created by</dt>
+                    <dd>{{ application.createdByName }}</dd>
+                  </div>
+                  <div>
+                    <dt>Reviewer</dt>
+                    <dd>{{ application.assignedReviewerName || 'Unassigned' }}</dd>
+                  </div>
+                  <div>
+                    <dt>Updated</dt>
+                    <dd>
+                      <time [attr.datetime]="application.updatedAt">{{
+                        application.updatedAt | date: 'mediumDate'
+                      }}</time>
+                    </dd>
+                  </div>
+                </dl>
+                @if (canEdit(application)) {
+                  <a
+                    class="edit-link card-action"
+                    [routerLink]="['/applications', application.id, 'edit']"
+                    [attr.aria-label]="
+                      'Edit draft for ' + (application.legalName || 'untitled application')
+                    "
+                    >Edit draft</a
+                  >
+                }
+              </article>
+            }
+          </div>
+        }
+      }
+    }
+    <mat-paginator
+      aria-label="Application pages"
+      [length]="state.kind === 'success' ? state.page.total : 0"
+      [pageIndex]="store.query().page - 1"
+      [pageSize]="store.query().pageSize"
+      [pageSizeOptions]="[10, 25, 50]"
+      [showFirstLastButtons]="true"
+      [disabled]="state.kind === 'loading'"
+      (page)="store.setPage($event.pageIndex, $event.pageSize)"
+    />
+  </section>
+</div>

@@ -1,6 +1,6 @@
 # Security notes
 
-## Implemented in Checkpoint 3
+## Server controls implemented in checkpoint 3
 
 The mock API authenticates protected requests and enforces role, ownership, assignment, and workflow state on the server. List scope is applied before filtering, pagination, and totals. Draft patches use nested field allowlists, so client-supplied owner, status, role, and history fields cannot change internal records. Runtime validation complements TypeScript, whose types do not validate incoming JSON.
 
@@ -18,9 +18,21 @@ Optimistic versions prevent stale writes within the single server process. A rea
 
 The API returns 403 for an existing record outside the user's scope and 404 for an unknown record. This intentionally distinguishes those conditions in the demo. A production policy may choose uniform 404 responses to reduce record-existence disclosure.
 
-## Planned frontend protections
+## Frontend controls implemented through checkpoint 6
 
-Checkpoint 4 will add in-memory frontend session state, a bearer interceptor restricted to the trusted API, coordinated refresh for concurrent 401 responses, and route guards. Later checkpoints will add permission-aware controls and temporary sensitive-field reveal. None of these frontend protections are claimed implemented by the mock API tests.
+`app.config.ts` registers the bearer interceptor and guarded application routes. Public login sits outside the authenticated workspace shell. Frontend session state is memory-only; browser reload requires sign-in again. The interceptor attaches credentials only to normalized root-relative protected API URLs, coordinates one refresh for concurrent 401s, and retries once. Login, logout, refresh, and health requests are excluded from that handling. Session revisions prevent stale responses from restoring a previous user. Server logout is best effort after immediate local session clearing.
+
+Safe return navigation permits `/overview`, `/applications`, `/applications/new`, and edit paths matching `/applications/app-[a-z\d-]+/edit`, with the accepted route's query and fragment preserved. Other destinations fall back to overview. This controls navigation; it does not make route parameters an authorization source.
+
+The dashboard receives only server-scoped summaries. It does not download a global dataset and hide unauthorized rows in the browser. Filtering and totals follow the server's role scope. Results and query state are scoped to each route visit, and pending list reads are cancelled when a newer query takes over or the page is destroyed. Banking values are absent from list responses. See [authentication](AUTHENTICATION.md) and [dashboard behavior](DASHBOARD.md).
+
+The SALES wizard uses permission guards for new/edit routes and checks record ownership and DRAFT state after loading. Sensitive input restoration uses separate masked/present metadata and blank password controls. Unchanged secrets are omitted from writes; dirty values are replacements or explicit clears. Review summaries mask those values. Raw replacements remain only in the active form/coordinator memory and write body; the coordinator and banking controls clear them after successful submission. They are not put in browser persistence or URLs.
+
+Autosave serializes versioned writes and pauses on conflict. Neither cancelled requests nor navigation can promise rollback of an accepted write. Explicit navigation and sign out consult a pending-draft safeguard. Browser reload loses the memory-only session and any remaining unsaved edits; its native warning is advisory and is not a persistence mechanism. See [the wizard guide](WIZARD.md).
+
+## Remaining frontend and deployment work
+
+General application detail, administrator/reviewer actions, and temporary sensitive-field reveal remain future screens. Their record-level checks already belong to the API and must also guide the eventual UI.
 
 Avoid placing tokens or raw sensitive values in URLs, logs, or browser persistence. Rendering should use Angular's normal escaped bindings, without bypassing sanitization. A production authentication design should choose its cookie/token storage strategy alongside the backend, including CSRF protections when cookie credentials are used.
 
@@ -28,4 +40,4 @@ The assignment's CSP requirement remains future deployment work. A CSP must be d
 
 ## Verification
 
-The HTTP tests cover login/expiry/rotation/logout, role and record scope, default masking and reveal restrictions, field allowlists, version conflicts, workflow transitions, and unchanged data after an injected failed save. The tests are evidence for these bounded behaviors, not a penetration test or a claim that production security is complete.
+The server HTTP tests cover login/expiry/rotation/logout, role and record scope, default masking and reveal restrictions, field allowlists, version conflicts, workflow transitions, and unchanged data after an injected failed save. Angular tests exercise concurrent refresh, session races, guarded navigation, and the real application provider configuration with a controlled HTTP backend. Dashboard tests exercise reads, cancellation, and error recovery. Wizard tests cover masking, explicit sensitive-field clearing, draft/submission validation, serialized writes, version conflicts, final-save-before-submit, and leave behavior. See [the progress log](PROGRESS.md) for executed results. These are bounded behavioral checks, not a penetration test or a claim that production security is complete.

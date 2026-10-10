@@ -1,0 +1,334 @@
+<div [formGroup]="form()">
+  @switch (step()) {
+    @case (0) {
+      <section formGroupName="business" aria-label="Business details">
+        <p class="section-note">
+          Tell us about the merchant and the products or services they offer.
+        </p>
+        <div class="field-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Legal business name</mat-label>
+            <input
+              matInput
+              formControlName="legalName"
+              maxlength="500"
+              autocomplete="off"
+              required
+            />
+            @if (error('business.legalName'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Trading name (optional)</mat-label>
+            <input matInput formControlName="tradingName" maxlength="500" autocomplete="off" />
+            @if (error('business.tradingName'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Registration number</mat-label>
+            <input
+              matInput
+              formControlName="registrationNumber"
+              maxlength="20"
+              autocomplete="off"
+              required
+            />
+            <mat-hint>6–20 letters, digits, or hyphens.</mat-hint>
+            @if (error('business.registrationNumber'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Business type</mat-label>
+            <mat-select formControlName="businessType" required>
+              <mat-option value="SOLE_TRADER">Sole trader</mat-option>
+              <mat-option value="PARTNERSHIP">Partnership</mat-option>
+              <mat-option value="COMPANY">Company</mat-option>
+            </mat-select>
+            @if (error('business.businessType'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Industry</mat-label>
+            <input
+              matInput
+              formControlName="industry"
+              maxlength="500"
+              autocomplete="off"
+              required
+            />
+            <mat-hint>For example, retail or professional services.</mat-hint>
+            @if (error('business.industry'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Website (optional)</mat-label>
+            <input
+              matInput
+              type="url"
+              formControlName="website"
+              maxlength="500"
+              autocomplete="off"
+            />
+            <mat-hint>Include https:// or http://.</mat-hint>
+            @if (error('business.website'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </section>
+    }
+    @case (1) {
+      <section formGroupName="contact" aria-label="Contact details">
+        <p class="section-note">Use a fictional contact and address for this demonstration.</p>
+        <div class="field-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Contact name</mat-label>
+            <input
+              matInput
+              formControlName="fullName"
+              maxlength="500"
+              autocomplete="off"
+              required
+            />
+            @if (error('contact.fullName'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Email address</mat-label>
+            <input
+              matInput
+              type="email"
+              formControlName="email"
+              maxlength="500"
+              autocomplete="off"
+              autocapitalize="none"
+              required
+            />
+            <mat-hint>Use an example.test address for demo data.</mat-hint>
+            @if (error('contact.email'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Phone number</mat-label>
+            <input
+              matInput
+              type="tel"
+              formControlName="phone"
+              maxlength="500"
+              autocomplete="off"
+              required
+            />
+            <mat-hint>7–15 digits; spaces and a leading + are accepted.</mat-hint>
+            @if (error('contact.phone'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Street address</mat-label>
+            <input
+              matInput
+              formControlName="addressLine"
+              maxlength="500"
+              autocomplete="off"
+              required
+            />
+            @if (error('contact.addressLine'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>City</mat-label>
+            <input matInput formControlName="city" maxlength="500" autocomplete="off" required />
+            @if (error('contact.city'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Postal code</mat-label>
+            <input
+              matInput
+              formControlName="postalCode"
+              maxlength="500"
+              autocomplete="off"
+              required
+            />
+            @if (error('contact.postalCode'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </section>
+    }
+    @case (2) {
+      <section formGroupName="banking" aria-label="Banking details">
+        <div class="privacy-note">
+          <strong>Use fictional banking details only.</strong>
+          <p>
+            Saved numbers stay hidden. Leave a saved field untouched to keep its value. Enter a new
+            number to replace it; editing then clearing a field removes its saved value when the
+            draft saves.
+          </p>
+        </div>
+        <div class="field-grid">
+          <mat-form-field class="full-width" appearance="outline">
+            <mat-label>Bank name</mat-label>
+            <input
+              matInput
+              formControlName="bankName"
+              maxlength="500"
+              autocomplete="off"
+              required
+            />
+            @if (error('banking.bankName'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Account number</mat-label>
+            <input
+              matInput
+              type="password"
+              inputmode="numeric"
+              formControlName="accountNumber"
+              maxlength="17"
+              autocomplete="new-password"
+              [required]="!sensitive().accountNumber.present"
+            />
+            <mat-hint>
+              @if (sensitive().accountNumber.present) {
+                Saved: {{ sensitive().accountNumber.masked }}. Leave untouched to keep.
+              } @else {
+                Use 8–17 fictional digits.
+              }
+            </mat-hint>
+            @if (error('banking.accountNumber'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Tax ID</mat-label>
+            <input
+              matInput
+              type="password"
+              inputmode="numeric"
+              formControlName="taxId"
+              maxlength="9"
+              autocomplete="new-password"
+              [required]="!sensitive().taxId.present"
+            />
+            <mat-hint>
+              @if (sensitive().taxId.present) {
+                Saved: {{ sensitive().taxId.masked }}. Leave untouched to keep.
+              } @else {
+                Use exactly 9 fictional digits.
+              }
+            </mat-hint>
+            @if (error('banking.taxId'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+        </div>
+      </section>
+    }
+    @case (3) {
+      <section formGroupName="processing" aria-label="Processing profile">
+        <p class="section-note">
+          Estimate the merchant’s processing amounts using a consistent currency.
+        </p>
+        <div class="field-grid">
+          <mat-form-field appearance="outline">
+            <mat-label>Monthly processing volume</mat-label>
+            <input
+              matInput
+              type="number"
+              inputmode="decimal"
+              formControlName="monthlyVolume"
+              min="0"
+              max="1000000000000"
+              step="any"
+              required
+              [aria-describedby]="
+                processingError('maxExceedsMonthly') ? 'monthly-volume-error' : ''
+              "
+            />
+            <mat-hint>Total amount expected in a typical month.</mat-hint>
+            @if (error('processing.monthlyVolume'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Average transaction amount</mat-label>
+            <input
+              matInput
+              type="number"
+              inputmode="decimal"
+              formControlName="averageTicket"
+              min="0"
+              max="1000000000000"
+              step="any"
+              required
+              [aria-describedby]="
+                processingError('averageExceedsMax') ? 'average-ticket-error' : ''
+              "
+            />
+            <mat-hint>Expected amount of a typical transaction.</mat-hint>
+            @if (error('processing.averageTicket'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+          <mat-form-field appearance="outline">
+            <mat-label>Maximum transaction amount</mat-label>
+            <input
+              matInput
+              type="number"
+              inputmode="decimal"
+              formControlName="maxTicket"
+              min="0"
+              max="1000000000000"
+              step="any"
+              required
+              [aria-describedby]="
+                processingError('averageExceedsMax')
+                  ? 'average-ticket-error'
+                  : processingError('maxExceedsMonthly')
+                    ? 'monthly-volume-error'
+                    : ''
+              "
+            />
+            <mat-hint>The largest transaction the merchant expects.</mat-hint>
+            @if (error('processing.maxTicket'); as message) {
+              <mat-error>{{ message }}</mat-error>
+            }
+          </mat-form-field>
+          <div class="international-option">
+            <mat-checkbox formControlName="acceptsInternational"
+              >Accept international payments</mat-checkbox
+            >
+            @if (error('processing.acceptsInternational'); as message) {
+              <p class="field-error" role="alert">{{ message }}</p>
+            }
+          </div>
+        </div>
+        <div class="group-errors" aria-live="polite">
+          @if (processingError('averageExceedsMax')) {
+            <p id="average-ticket-error">
+              The average transaction amount must not exceed the maximum transaction amount.
+            </p>
+          }
+          @if (processingError('maxExceedsMonthly')) {
+            <p id="monthly-volume-error">
+              The maximum transaction amount must not exceed the monthly processing volume.
+            </p>
+          }
+        </div>
+      </section>
+    }
+  }
+</div>
