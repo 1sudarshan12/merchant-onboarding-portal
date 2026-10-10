@@ -116,7 +116,24 @@ The `feat/application-wizard` branch initially lacked the existing checkpoint 5 
 
 ## Future checkpoints
 
-7. Add application detail, assigned reviews, admin assignments, and controlled sensitive-field reveal.
+## Checkpoint 7: Detail, assignment, review, and controlled reveal
+
+Implemented the lazy application detail route and linked every dashboard merchant to it. The detail view shows the public form summary, assignment and review history, and role-aware actions. ADMIN users can assign or reassign a reviewer on submitted/in-review records. The assigned REVIEWER can record an approval or rejection with a risk level; rejection requires a note. ADMIN and the assigned REVIEWER can explicitly reveal stored banking values for the current session, while the default view remains masked and SALES has no reveal action.
+
+The UI sends the server's current version for assignment and decisions, keeps server errors visible, and reloads safely after conflicts. Raw reveal values are held in component memory only and can be hidden again; they are not placed in URLs, browser storage, or the default detail response. The API remains the authorization boundary.
+
+Verification on 10 October 2026:
+
+- `npm run test:ci`: 80 tests passed across 10 files, including detail masking/reveal and rejection-note tests.
+- `npm run build`: passed after adding the lazy detail chunk; the existing dashboard stylesheet budget was kept within its limit.
+- Live Reviewer flow: assigned applications appeared in the scoped list; opening `app-003` showed masked banking data, the reveal request showed raw values only after the explicit action, and rejecting without a note was blocked with visible validation.
+- Live Admin flow: an unassigned submitted application (`app-027`) loaded an explicit reviewer selector; assigning Demo Reviewer 02 changed the record to IN_REVIEW and updated its assigned reviewer.
+- A lifecycle bug discovered during the first reveal click was corrected by passing the component `DestroyRef` to subscriptions created by event handlers.
+
+The mock API contract and its earlier 25-test result remain unchanged. Full accessibility audit, broader keyboard review, and submission preparation remain future work. See [detail implementation notes](DETAIL.md).
+
+## Future checkpoints
+
 8. Complete accessibility and responsive checks, security documentation, meaningful regression tests, and submission preparation.
 
 Update documentation and record verification during each checkpoint. Counts and real-time updates remain optional; prioritize completing the required workflows.

@@ -1,6 +1,6 @@
 # Merchant Portal
 
-An Angular merchant onboarding application being built in guided checkpoints. The current UI includes sign-in, a protected responsive workspace, and an application dashboard with server pagination, merchant search, status filters, and loading, empty, error, and retry states. SALES users can create and edit their own drafts in a five-step wizard, with validation, autosave, masked restoration, and submission. The mock API enforces roles and supports the remaining review workflow; application detail, reviewer assignment, and approval/rejection screens remain future checkpoints.
+An Angular merchant onboarding application being built in guided checkpoints. The current UI includes sign-in, a protected responsive workspace, an application dashboard with server pagination, merchant search, status filters, and recovery states, a SALES draft wizard with validation/autosave/masked restoration, and role-aware application detail, assignment, review-decision, and controlled reveal screens. The mock API enforces the same permission and version rules as the UI.
 
 ## Run locally
 
@@ -55,7 +55,7 @@ Demo accounts: `sales1@example.test`, `sales2@example.test`, `reviewer1@example.
 - `mock-api/validation.ts` validates incoming data at runtime; `responses.ts` constructs safe public responses; `seed.ts` supplies fictional records.
 - `mock-api/app.spec.ts` exercises the API over HTTP; `shared/permissions.spec.ts` checks permission rules.
 
-Tests are written for frontend authentication and concurrent refresh, real application wiring, dashboard request cancellation and retry, and server-side permissions, pagination, masking, validation, version conflicts, and workflow transitions. See the progress log for executed checks and results. Wizard tests cover masked restoration, validators, serialized autosave, final-save-before-submit, conflicts, and navigation safeguards. Detail/review interactions remain to be implemented.
+Tests are written for frontend authentication and concurrent refresh, real application wiring, dashboard request cancellation and retry, server-side permissions, pagination, masking, validation, version conflicts, workflow transitions, and detail reveal/review interactions. See the progress log for executed checks and results. Wizard tests cover masked restoration, validators, serialized autosave, final-save-before-submit, conflicts, and navigation safeguards.
 
 ## Documentation maintained with each checkpoint
 

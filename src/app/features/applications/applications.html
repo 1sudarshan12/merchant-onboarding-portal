@@ -145,9 +145,11 @@
               @for (application of state.page.items; track application.id) {
                 <tr>
                   <th scope="row">
-                    <span class="merchant-name">{{
-                      application.legalName || 'Untitled application'
-                    }}</span>
+                    <a
+                      class="merchant-name detail-link"
+                      [routerLink]="['/applications', application.id]"
+                      >{{ application.legalName || 'Untitled application' }}</a
+                    >
                     <span class="application-id">{{ application.id }}</span>
                   </th>
                   <td>
@@ -192,7 +194,9 @@
                 <div class="card-heading">
                   <div>
                     <h3 class="merchant-name" [id]="'merchant-' + application.id">
-                      {{ application.legalName || 'Untitled application' }}
+                      <a class="detail-link" [routerLink]="['/applications', application.id]">
+                        {{ application.legalName || 'Untitled application' }}
+                      </a>
                     </h3>
                     <span class="application-id">{{ application.id }}</span>
                   </div>
