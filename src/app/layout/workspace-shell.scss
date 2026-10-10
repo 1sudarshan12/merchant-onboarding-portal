@@ -1,0 +1,247 @@
+:host {
+  display: block;
+}
+
+.shell {
+  min-height: 100dvh;
+}
+
+.sidebar {
+  width: 252px;
+  padding: var(--space-8) var(--space-4);
+  background: var(--color-sidebar);
+  color: white;
+  border-right: 0;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-3);
+  margin-bottom: 3.5rem;
+  color: inherit;
+  text-decoration: none;
+  font-size: 1.2rem;
+  font-weight: 650;
+  letter-spacing: -0.03em;
+}
+
+.brand-mark {
+  display: grid;
+  grid-auto-flow: column;
+  place-content: center;
+  width: 42px;
+  height: 42px;
+  border: 1px solid #617987;
+  border-radius: 12px;
+  font-size: 2rem;
+  font-weight: 600;
+  line-height: 1;
+
+  span {
+    color: #8cd6b3;
+  }
+}
+
+.brand-subtitle {
+  display: block;
+  margin-top: var(--space-1);
+  font-size: 0.55rem;
+  letter-spacing: 0.16em;
+  color: var(--color-sidebar-muted);
+}
+
+.nav-label {
+  padding-inline: var(--space-4);
+  margin-bottom: var(--space-3);
+  color: var(--color-sidebar-muted);
+  font-size: 0.625rem;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+}
+
+nav {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  width: 100%;
+  min-height: 46px;
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: #c9d5df;
+  text-decoration: none;
+  font-size: 0.8125rem;
+  text-align: left;
+  cursor: pointer;
+
+  &:hover {
+    background: #203b4b;
+    color: white;
+  }
+
+  &--active {
+    background: #264352;
+    color: white;
+    box-shadow: inset 3px 0 #8cd6b3;
+  }
+}
+
+.sidebar-note {
+  margin: 5rem var(--space-3) 0;
+  padding-top: var(--space-6);
+  border-top: 1px solid #36505e;
+
+  p {
+    margin: var(--space-4) 0 var(--space-2);
+    font-size: 0.875rem;
+    font-weight: 500;
+  }
+
+  > span:last-child {
+    display: block;
+    max-width: 170px;
+    color: var(--color-sidebar-muted);
+    font-size: 0.75rem;
+    line-height: 1.75;
+  }
+}
+
+.sidebar-note-icon {
+  color: #91cfb5;
+}
+
+.sidebar-footer {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  margin: var(--space-12) var(--space-3) 0;
+  color: var(--color-sidebar-muted);
+  font-size: 0.6875rem;
+}
+
+.footer-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: #91cfb5;
+}
+
+.topbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  min-height: 76px;
+  padding: var(--space-4) clamp(1rem, 3vw, 3rem);
+  border-bottom: 1px solid var(--color-border);
+  background: var(--color-surface);
+  font-size: 0.8125rem;
+}
+
+.topbar-start,
+.session-actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.breadcrumb-parent {
+  color: var(--color-muted);
+}
+
+.session-identity {
+  display: grid;
+  gap: 2px;
+  text-align: right;
+}
+
+.user-name {
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-weight: 600;
+}
+
+.user-role {
+  font-size: 0.625rem;
+  letter-spacing: 0.06em;
+  color: var(--color-muted);
+}
+
+.breadcrumb-divider {
+  color: #80919e;
+}
+
+.breadcrumb-current {
+  color: var(--color-ink);
+  font-weight: 600;
+}
+
+main {
+  max-width: 1280px;
+  margin-inline: auto;
+  padding: clamp(1.5rem, 3.5vw, 3rem);
+}
+
+.page-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-6) clamp(1.5rem, 3.5vw, 3rem);
+  color: var(--color-muted);
+  font-size: 0.6875rem;
+}
+
+.skip-link {
+  position: fixed;
+  z-index: 10;
+  top: var(--space-3);
+  left: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  transform: translateY(-200%);
+  border-radius: var(--radius-sm);
+  background: var(--color-surface);
+  color: var(--color-accent);
+
+  &:focus {
+    transform: translateY(0);
+  }
+}
+
+@media (max-width: 599px) {
+  .topbar {
+    min-height: 64px;
+    padding: var(--space-2);
+  }
+
+  .breadcrumb-parent,
+  .breadcrumb-divider {
+    display: none;
+  }
+
+  .topbar-start,
+  .session-actions {
+    gap: var(--space-1);
+  }
+
+  .user-name {
+    max-width: 96px;
+    font-size: 0.75rem;
+  }
+
+  main {
+    padding: var(--space-6) var(--space-4);
+  }
+
+  .page-footer {
+    padding-inline: var(--space-4);
+  }
+}
